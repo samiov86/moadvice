@@ -3,6 +3,7 @@ import { SiteFooter } from "@/components/site-footer";
 
 export interface LegalShellProps {
   title: string;
+  /** ISO date (YYYY-MM-DD) — formatted here so every page reads the same. */
   updated: string;
   intro?: string;
   children: React.ReactNode;
@@ -30,7 +31,15 @@ export function LegalShell({
           </p>
           <h1 className="mt-4 font-display text-4xl leading-tight">{title}</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            Last updated {updated}
+            Last updated{" "}
+            <time dateTime={updated}>
+              {new Intl.DateTimeFormat("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                timeZone: "UTC",
+              }).format(new Date(updated))}
+            </time>
           </p>
 
           {intro && (

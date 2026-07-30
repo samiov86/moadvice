@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import {
   ArrowRight,
   Check,
@@ -17,6 +18,19 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { PLANS, THEMES, siteConfig } from "@/lib/site";
 import { MESSAGE_BANK } from "@/data/message-bank";
+import {
+  faqSchema,
+  jsonLd,
+  organizationSchema,
+  productSchema,
+  websiteSchema,
+} from "@/lib/structured-data";
+
+export const metadata: Metadata = {
+  // Without this, /?utm_source=… and any other parameterised variant can be
+  // indexed as a separate page competing with the real one.
+  alternates: { canonical: "/" },
+};
 
 const HOW_IT_WORKS = [
   {
@@ -84,8 +98,23 @@ const FAQS = [
 ];
 
 export default function HomePage() {
+  const schemas = [
+    organizationSchema(),
+    websiteSchema(),
+    productSchema(),
+    faqSchema(FAQS),
+  ];
+
   return (
     <>
+      {schemas.map((schema, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd(schema) }}
+        />
+      ))}
+
       <SiteHeader />
 
       <main className="flex-1">

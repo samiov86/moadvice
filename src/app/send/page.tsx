@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "Send kind words",
   description:
     "Send an anonymous compliment by email. One message for $1, or a different one every morning for $5 a month.",
+  alternates: { canonical: "/send" },
 };
 
 interface SendPageProps {

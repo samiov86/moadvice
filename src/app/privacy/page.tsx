@@ -6,15 +6,14 @@ import { siteConfig } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: `How ${siteConfig.name} handles your data and the data of people you send to.`,
+  alternates: { canonical: "/privacy" },
 };
-
-const UPDATED = "29 July 2026";
 
 export default function PrivacyPage() {
   return (
     <LegalShell
       title="Privacy Policy"
-      updated={UPDATED}
+      updated={siteConfig.legalUpdatedAt}
       intro={`${siteConfig.name} handles two kinds of people's data: senders, who pay us, and recipients, who never asked for an account. Recipients get the stricter treatment.`}
     >
       <section>

@@ -11,6 +11,12 @@ export const siteConfig = {
   description:
     "Mo Advice sends anonymous compliments by email — short, genuine words that boost someone's confidence and morale. No account needed for the person receiving them.",
   supportEmail: "hello@moadvice.com",
+  /**
+   * When the legal pages last changed, ISO date. Single source for both the
+   * "Last updated" line those pages display and the sitemap's `lastmod`, so
+   * the two can't disagree. Bump it whenever you edit Terms or Privacy.
+   */
+  legalUpdatedAt: "2026-07-29",
   /** Absolute origin, used for links inside emails and Stripe redirect URLs. */
   url:
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??

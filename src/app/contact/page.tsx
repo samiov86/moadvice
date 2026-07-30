@@ -7,13 +7,14 @@ import { siteConfig } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Contact",
   description: `Get in touch with ${siteConfig.name}.`,
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {
   return (
     <LegalShell
       title="Contact"
-      updated="29 July 2026"
+      updated={siteConfig.legalUpdatedAt}
       intro="One inbox, read by a person, usually answered within a day."
     >
       <section>

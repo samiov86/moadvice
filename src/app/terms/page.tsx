@@ -6,15 +6,14 @@ import { siteConfig } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: `The terms that apply when you use ${siteConfig.name}.`,
+  alternates: { canonical: "/terms" },
 };
-
-const UPDATED = "29 July 2026";
 
 export default function TermsPage() {
   return (
     <LegalShell
       title="Terms of Service"
-      updated={UPDATED}
+      updated={siteConfig.legalUpdatedAt}
       intro={`These terms cover your use of ${siteConfig.name} (${siteConfig.domain}). They're written to be read, not to be impressive. If anything here is unclear, email ${siteConfig.supportEmail} and we'll explain it.`}
     >
       <section>
