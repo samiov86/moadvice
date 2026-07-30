@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { PLANS, THEMES, siteConfig } from "@/lib/site";
+import { MESSAGE_BANK } from "@/data/message-bank";
 
 const HOW_IT_WORKS = [
   {
@@ -35,23 +36,25 @@ const HOW_IT_WORKS = [
   },
 ];
 
-const TESTIMONIALS = [
-  {
-    quote:
-      "I set up a month for a teammate who was quietly having a terrible quarter. She mentioned to the team that she'd been getting these strange, lovely emails and had no idea who from. She was smiling for the first time in weeks.",
-    attribution: "Engineering manager, fintech",
-  },
-  {
-    quote:
-      "My brother would never in a hundred years let me tell him any of this directly. Anonymously, once a day, he reads all of it.",
-    attribution: "Sent 6 months of daily words",
-  },
-  {
-    quote:
-      "We ran it for the whole support team through a brutal launch. Nobody knew where it came from. Morale genuinely shifted.",
-    attribution: "Head of CX, SaaS company",
-  },
-];
+/**
+ * Four real messages, straight from the bank that gets sent.
+ *
+ * This section used to hold invented customer quotes. Showing the actual
+ * product is both honest and better proof — the words are the thing people are
+ * buying, so let them read some. Chosen by slug rather than at random so the
+ * page is stable, and picked to avoid repeating the two shown in the hero and
+ * the theme section above.
+ */
+const SHOWCASE = [
+  "pro-mentorship",
+  "per-resilience",
+  "pro-unglamorous-work",
+  "per-gentle-with-self",
+].map((slug) => {
+  const message = MESSAGE_BANK.find((entry) => entry.slug === slug);
+  if (!message) throw new Error(`Showcase message "${slug}" is missing`);
+  return message;
+});
 
 const FAQS = [
   {
@@ -338,28 +341,50 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ----------------------------------------------- Testimonials */}
+        {/* ------------------------------------------- Real messages */}
         <section className="border-y border-border bg-card">
-          <div className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-8">
-            <h2 className="max-w-2xl font-display text-3xl leading-tight text-balance sm:text-4xl">
-              What happens on the other end
-            </h2>
+          <div className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-8 lg:py-24">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                The actual words
+              </p>
+              <h2 className="mt-4 font-display text-3xl leading-tight text-balance sm:text-4xl">
+                Four of the {MESSAGE_BANK.length}, exactly as they arrive
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Every message is written and edited by hand. No templates with a
+                name slotted in, nothing generated on the fly — just specific
+                things that are true of someone, said plainly.
+              </p>
+            </div>
 
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {TESTIMONIALS.map((testimonial) => (
+            <div className="mt-12 grid gap-6 sm:grid-cols-2">
+              {SHOWCASE.map((message) => (
                 <figure
-                  key={testimonial.attribution}
+                  key={message.slug}
                   className="flex flex-col rounded-2xl border border-border bg-background p-7"
                 >
-                  <blockquote className="flex-1 font-display text-[17px] leading-[1.7]">
-                    “{testimonial.quote}”
+                  <div className="flex items-start justify-between gap-4">
+                    <h3 className="font-display text-xl leading-snug">
+                      {message.headline}
+                    </h3>
+                    <Badge variant="muted" className="shrink-0">
+                      {message.category === "PERSONAL"
+                        ? "Personal"
+                        : "Professional"}
+                    </Badge>
+                  </div>
+                  <blockquote className="mt-4 flex-1 font-display text-[17px] leading-[1.7] text-muted-foreground">
+                    {message.body}
                   </blockquote>
-                  <figcaption className="mt-5 text-sm text-muted-foreground">
-                    {testimonial.attribution}
-                  </figcaption>
                 </figure>
               ))}
             </div>
+
+            <p className="mt-8 text-sm text-muted-foreground">
+              A daily plan works through the bank without repeating, so nobody
+              receives the same message twice until they&apos;ve seen them all.
+            </p>
           </div>
         </section>
 
