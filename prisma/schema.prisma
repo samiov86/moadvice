@@ -1,0 +1,266 @@
+// Mo Advice — database schema
+// Postgres + Prisma. See README.md for setup.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+/// The two voices a message can be written in.
+enum MessageCategory {
+  PERSONAL
+  PROFESSIONAL
+}
+
+/// What the sender bought.
+enum Plan {
+  ONE_OFF // $1, a single message
+  DAILY // $5/month, one message every day
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  PAUSED
+}
+
+enum DeliveryStatus {
+  SENT
+  FAILED
+  SKIPPED
+}
+
+// ---------------------------------------------------------------------------
+// Auth (NextAuth / Auth.js) + sender account
+// ---------------------------------------------------------------------------
+
+/// A sender. Created lazily at checkout — a sender never has to sign up before
+/// paying. Signing in later (magic link to the same address) reveals their
+/// history in the dashboard.
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+
+  /// Stripe customer, reused across every purchase this sender makes.
+  stripeCustomerId String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  subscriptions Subscription[]
+
+  @@index([stripeCustomerId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Product
+// ---------------------------------------------------------------------------
+
+/// Someone who receives kind words. Never has an account, never learns who
+/// sent anything. Identified only by email address.
+model Recipient {
+  id   String  @id @default(cuid())
+  /// Always stored lowercased + trimmed.
+  email String @unique
+  /// Optional first name the sender supplied, used to personalise the greeting.
+  name String?
+
+  /// Opaque token used for one-click opt-out links in every email.
+  unsubscribeToken String    @unique @default(cuid())
+  unsubscribedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders        Order[]
+  subscriptions Subscription[]
+  messagesSent  MessageSent[]
+
+  @@index([unsubscribedAt])
+}
+
+/// One purchase. Covers both plans: a ONE_OFF order is the whole product, a
+/// DAILY order is the checkout that started a Subscription.
+model Order {
+  id          String @id @default(cuid())
+  userId      String
+  recipientId String
+
+  plan     Plan
+  theme    MessageCategory
+  /// Amount actually charged, in the smallest currency unit.
+  amountCents Int
+  currency    String      @default("usd")
+  status      OrderStatus @default(PENDING)
+
+  stripeCheckoutSessionId String? @unique
+  stripePaymentIntentId   String? @unique
+
+  /// Free-text note the sender may add; never shown to the recipient.
+  senderNote String?
+
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipient    Recipient     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  subscription Subscription?
+  messagesSent MessageSent[]
+
+  @@index([userId])
+  @@index([recipientId])
+  @@index([status])
+}
+
+/// An active daily plan: one recipient, one Stripe subscription, one message
+/// per day. A sender may hold many of these at once.
+model Subscription {
+  id          String @id @default(cuid())
+  userId      String
+  recipientId String
+  orderId     String? @unique
+
+  theme  MessageCategory
+  status SubscriptionStatus @default(ACTIVE)
+
+  stripeSubscriptionId String  @unique
+  stripeCustomerId     String
+  stripePriceId        String?
+
+  /// Hour of day (UTC) the daily message goes out. Defaults to 06:00 UTC.
+  sendHourUtc Int @default(6)
+
+  /// Delivery bookkeeping — the cron picks up rows where nextSendAt <= now().
+  nextSendAt DateTime?
+  lastSentAt DateTime?
+  sentCount  Int       @default(0)
+
+  currentPeriodEnd  DateTime?
+  cancelAtPeriodEnd Boolean   @default(false)
+  canceledAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipient    Recipient     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  order        Order?        @relation(fields: [orderId], references: [id])
+  messagesSent MessageSent[]
+
+  @@index([userId])
+  @@index([recipientId])
+  @@index([status, nextSendAt])
+}
+
+/// The message bank. Seeded from src/data/message-bank.ts.
+model MessageTemplate {
+  id       String          @id @default(cuid())
+  category MessageCategory
+  /// Short line used as the email subject / headline.
+  headline String
+  /// The message itself. Two to four sentences, second person.
+  body     String
+  /// Stable key so re-seeding updates rather than duplicates.
+  slug     String          @unique
+  active   Boolean         @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messagesSent MessageSent[]
+
+  @@index([category, active])
+}
+
+/// Delivery log. One row per email sent to a recipient. Also used to avoid
+/// repeating a message to the same person.
+model MessageSent {
+  id          String  @id @default(cuid())
+  recipientId String
+  templateId  String
+  /// Exactly one of these is set, depending on what paid for the message.
+  orderId        String?
+  subscriptionId String?
+
+  theme    MessageCategory
+  subject  String
+  status   DeliveryStatus  @default(SENT)
+  /// Resend's message id, useful for support lookups.
+  providerMessageId String?
+  error             String?
+
+  sentAt DateTime @default(now())
+
+  recipient    Recipient       @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  template     MessageTemplate @relation(fields: [templateId], references: [id])
+  order        Order?          @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  subscription Subscription?   @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([recipientId, sentAt])
+  @@index([subscriptionId])
+  @@index([templateId])
+}
