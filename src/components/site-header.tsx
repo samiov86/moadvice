@@ -1,8 +1,17 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { MobileNav, type NavLink } from "@/components/mobile-nav";
 import { siteConfig } from "@/lib/site";
 import { cn } from "@/lib/utils";
+
+/** Single source for the header links, shared by both breakpoints. */
+const NAV_LINKS: NavLink[] = [
+  { href: "/#how", label: "How it works" },
+  { href: "/#pricing", label: "Pricing" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/signin", label: "Sign in" },
+];
 
 export function Logo({ className }: { className?: string }) {
   return (
@@ -28,30 +37,30 @@ export function SiteHeader() {
         <Logo />
 
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          <Link href="/#how" className="transition-colors hover:text-foreground">
-            How it works
-          </Link>
-          <Link
-            href="/#pricing"
-            className="transition-colors hover:text-foreground"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="/dashboard"
-            className="transition-colors hover:text-foreground"
-          >
-            Dashboard
-          </Link>
+          {NAV_LINKS.filter((link) => link.href !== "/signin").map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="transition-colors hover:text-foreground"
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-            <Link href="/dashboard">Sign in</Link>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="hidden md:inline-flex"
+          >
+            <Link href="/signin">Sign in</Link>
           </Button>
           <Button asChild size="sm">
             <Link href="/send">Send kind words</Link>
           </Button>
+          <MobileNav links={NAV_LINKS} />
         </div>
       </div>
     </header>
