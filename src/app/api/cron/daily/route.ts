@@ -8,10 +8,10 @@ import { nextUtcHour } from "@/lib/utils";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 /** Generous ceiling — a batch of a few hundred emails takes well under this. */
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 /** Ceiling per invocation so one run can't hang. Cron reruns pick up the rest. */
-const BATCH_SIZE = 250;
+const BATCH_SIZE = 100;
 
 /**
  * Daily send. Wired to Vercel Cron in `vercel.json`, which fires hourly so that
