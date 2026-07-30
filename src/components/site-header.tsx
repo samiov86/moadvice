@@ -1,5 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 
+import quokkaMark from "../../public/quokka.png";
 import { Button } from "@/components/ui/button";
 import { MobileNav, type NavLink } from "@/components/mobile-nav";
 import { siteConfig } from "@/lib/site";
@@ -20,9 +22,19 @@ export function Logo({ className }: { className?: string }) {
       className={cn("group inline-flex items-center gap-2.5", className)}
       aria-label={`${siteConfig.name} home`}
     >
-      <span className="grid size-8 place-items-center rounded-full bg-primary text-primary-foreground">
-        <span className="font-display text-lg leading-none">m</span>
-      </span>
+      {/*
+        Statically imported so Next can size and optimise it — the source is
+        800x800 and gets served at the resolution actually needed. The artwork
+        already carries its own round background, so no wrapper is required.
+      */}
+      <Image
+        src={quokkaMark}
+        alt=""
+        width={32}
+        height={32}
+        priority
+        className="size-8 rounded-full"
+      />
       <span className="font-display text-lg tracking-tight">
         {siteConfig.name}
       </span>
