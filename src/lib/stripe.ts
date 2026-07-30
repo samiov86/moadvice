@@ -6,19 +6,37 @@ import { env } from "@/lib/env";
  * default is used, which keeps the SDK's TypeScript types and the live API in
  * agreement across upgrades. Pin it if you need reproducible behaviour:
  *   new Stripe(key, { apiVersion: "2025-10-29.clover" })
+ *
+ * Construction is deferred until the first property access. `next build` loads
+ * every route module to collect page data, so building the client eagerly would
+ * make a deploy require STRIPE_SECRET_KEY at build time — and fail the whole
+ * build if it were absent, rather than failing the one request that needs it.
  */
 const globalForStripe = globalThis as unknown as { stripe: Stripe | undefined };
 
-export const stripe =
-  globalForStripe.stripe ??
-  new Stripe(env.STRIPE_SECRET_KEY, {
-    typescript: true,
-    appInfo: { name: "Mo Advice", url: "https://moadvice.com" },
-  });
+function createClient(): Stripe {
+  const client =
+    globalForStripe.stripe ??
+    new Stripe(env.STRIPE_SECRET_KEY, {
+      typescript: true,
+      appInfo: { name: "Mo Advice", url: "https://moadvice.com" },
+    });
 
-if (process.env.NODE_ENV !== "production") {
-  globalForStripe.stripe = stripe;
+  if (process.env.NODE_ENV !== "production") {
+    globalForStripe.stripe = client;
+  }
+
+  return client;
 }
+
+let instance: Stripe | null = null;
+
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, property, receiver) {
+    instance ??= createClient();
+    return Reflect.get(instance, property, receiver);
+  },
+});
 
 /**
  * Find or create the Stripe customer for a sender. We always reuse the same

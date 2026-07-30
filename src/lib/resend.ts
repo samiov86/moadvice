@@ -1,14 +1,31 @@
 import { Resend } from "resend";
 import { env } from "@/lib/env";
 
+/**
+ * Deferred for the same reason as the Stripe client: `next build` loads route
+ * modules, and a missing RESEND_API_KEY should fail the request that sends mail,
+ * not the entire build. See `src/lib/stripe.ts`.
+ */
 const globalForResend = globalThis as unknown as { resend: Resend | undefined };
 
-export const resend =
-  globalForResend.resend ?? new Resend(env.RESEND_API_KEY);
+function createClient(): Resend {
+  const client = globalForResend.resend ?? new Resend(env.RESEND_API_KEY);
 
-if (process.env.NODE_ENV !== "production") {
-  globalForResend.resend = resend;
+  if (process.env.NODE_ENV !== "production") {
+    globalForResend.resend = client;
+  }
+
+  return client;
 }
+
+let instance: Resend | null = null;
+
+export const resend = new Proxy({} as Resend, {
+  get(_target, property, receiver) {
+    instance ??= createClient();
+    return Reflect.get(instance, property, receiver);
+  },
+});
 
 export interface SendEmailParams {
   to: string;

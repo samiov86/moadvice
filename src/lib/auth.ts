@@ -3,7 +3,6 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import ResendProvider from "next-auth/providers/resend";
 
 import { prisma } from "@/lib/prisma";
-import { env } from "@/lib/env";
 import { sendEmail } from "@/lib/resend";
 import { magicLinkEmail } from "@/emails/magic-link";
 
@@ -23,8 +22,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   providers: [
     ResendProvider({
-      apiKey: env.RESEND_API_KEY,
-      from: env.EMAIL_FROM,
+      // These two are read at module scope by Auth.js, which would drag env
+      // validation into `next build`. They're also unused: the overridden
+      // sendVerificationRequest below goes through our own `sendEmail`, which
+      // reads the validated values at request time.
+      apiKey: process.env.RESEND_API_KEY ?? "",
+      from: process.env.EMAIL_FROM ?? "",
       // Branded sign-in email instead of Auth.js's default.
       async sendVerificationRequest({ identifier, url }) {
         const { subject, html, text } = magicLinkEmail({ url });
