@@ -10,7 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioCard } from "@/components/ui/radio-group";
 import { EmailPreview } from "@/components/email-preview";
-import { PLANS, THEMES, type PlanId, type ThemeId } from "@/lib/site";
+import {
+  PLANS,
+  THEMES,
+  WITHDRAWAL_CONSENT_TEXT,
+  type PlanId,
+  type ThemeId,
+} from "@/lib/site";
 import { SEND_HOURS } from "@/lib/timezone";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +32,7 @@ interface FormState {
   senderEmail: string;
   sendHour: number;
   sendTimezone: string;
+  withdrawalConsent: boolean;
 }
 
 /**
@@ -86,6 +93,7 @@ export function SendForm({
     // and guessing during SSR would cause a hydration mismatch.
     sendHour: 8,
     sendTimezone: "UTC",
+    withdrawalConsent: false,
   });
 
   const [timezones, setTimezones] = React.useState<string[]>(["UTC"]);
@@ -141,7 +149,9 @@ export function SendForm({
       case 0:
         return EMAIL_PATTERN.test(form.recipientEmail.trim());
       case 3:
-        return EMAIL_PATTERN.test(form.senderEmail.trim());
+        return (
+          EMAIL_PATTERN.test(form.senderEmail.trim()) && form.withdrawalConsent
+        );
       default:
         return true;
     }
@@ -181,6 +191,7 @@ export function SendForm({
           senderEmail: form.senderEmail.trim(),
           theme: form.theme,
           plan: form.plan,
+          withdrawalConsent: form.withdrawalConsent,
           ...(form.plan === "DAILY"
             ? { sendHour: form.sendHour, sendTimezone: form.sendTimezone }
             : {}),
@@ -459,6 +470,26 @@ export function SendForm({
                   {plan.price}
                 </Summary>
               </dl>
+
+              <label
+                htmlFor="withdrawalConsent"
+                className="flex cursor-pointer gap-3 rounded-xl border border-border bg-secondary/40 p-4 transition-colors has-[:checked]:border-primary/50 has-[:checked]:bg-accent/30"
+              >
+                <input
+                  id="withdrawalConsent"
+                  name="withdrawalConsent"
+                  type="checkbox"
+                  checked={form.withdrawalConsent}
+                  onChange={(e) =>
+                    update("withdrawalConsent", e.target.checked)
+                  }
+                  className="mt-0.5 size-5 shrink-0 accent-[var(--primary)]"
+                  required
+                />
+                <span className="text-sm leading-relaxed text-muted-foreground">
+                  {WITHDRAWAL_CONSENT_TEXT}
+                </span>
+              </label>
 
               {error && (
                 <p

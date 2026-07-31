@@ -233,6 +233,7 @@ async function sendOneOffReceipt(orderId: string) {
     currency: order.currency,
     orderId: order.id,
     purchasedAt: order.paidAt ?? order.createdAt,
+    withdrawalConsentText: order.withdrawalConsentText,
   });
 
   await sendEmail({

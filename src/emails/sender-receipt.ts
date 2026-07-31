@@ -22,6 +22,8 @@ export interface SenderReceiptEmailParams {
   currency: string;
   orderId: string;
   purchasedAt: Date;
+  /** The wording consented to at checkout, echoed back as required. */
+  withdrawalConsentText?: string | null;
 }
 
 /** Confirmation + receipt for a $1 one-off. */
@@ -33,6 +35,7 @@ export function senderReceiptEmail({
   currency,
   orderId,
   purchasedAt,
+  withdrawalConsentText,
 }: SenderReceiptEmailParams) {
   const subject = `Your words are on their way to ${recipientName?.trim() || recipientEmail}`;
 
@@ -61,9 +64,16 @@ export function senderReceiptEmail({
       spacer(32),
     ].join(""),
     footerHtml: [
+      // Confirming the consent in writing is the third limb of the exemption —
+      // express consent, acknowledgement, then confirmation on a durable medium.
+      withdrawalConsentText
+        ? `You confirmed at checkout: &ldquo;${escapeAttr(withdrawalConsentText)}&rdquo;`
+        : "",
       `Your card statement will show <strong>${siteConfig.domain}</strong>. Stripe has also emailed you a formal receipt.`,
       `One-off messages are non-refundable once sent — see the <a href="${absoluteUrl("/terms")}" style="color:#94897C;">Terms</a>. Questions: ${siteConfig.supportEmail}`,
-    ].join("<br /><br />"),
+    ]
+      .filter(Boolean)
+      .join("<br /><br />"),
   });
 
   const text = toPlainText([

@@ -23,6 +23,21 @@ export const siteConfig = {
     "http://localhost:3000",
 } as const;
 
+/**
+ * Consent to immediate performance, shown at checkout and stored with the order.
+ *
+ * UK/EU consumers have a 14-day right to withdraw from a distance contract. For
+ * a digital service performed straight away, that right is only lost if the
+ * consumer expressly consents to immediate performance AND acknowledges losing
+ * it — and the trader confirms that on a durable medium afterwards.
+ *
+ * Without this, "one-off messages are non-refundable" simply wouldn't hold
+ * against a UK or EU buyer. The wording is stored per order rather than only
+ * referenced, so a dispute can be answered with exactly what was agreed to.
+ */
+export const WITHDRAWAL_CONSENT_TEXT =
+  "I want my message sent straight away, and I understand that once it has been sent I lose my right to cancel within 14 days.";
+
 export type PlanId = "ONE_OFF" | "DAILY";
 
 export interface PlanConfig {

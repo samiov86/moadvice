@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { env } from "@/lib/env";
 import { auth } from "@/lib/auth";
 import { stripe, ensureStripeCustomer } from "@/lib/stripe";
-import { PLANS, absoluteUrl } from "@/lib/site";
+import { PLANS, WITHDRAWAL_CONSENT_TEXT, absoluteUrl } from "@/lib/site";
 import { normalizeEmail } from "@/lib/utils";
 import { clientIpFrom, ipRateLimit, senderRateLimit } from "@/lib/rate-limit";
 import { isValidTimeZone } from "@/lib/timezone";
@@ -20,6 +20,14 @@ const checkoutSchema = z.object({
   plan: z.enum(["ONE_OFF", "DAILY"]),
   /** Daily plans only — when the recipient should get it, in their own time. */
   sendHour: z.coerce.number().int().min(0).max(23).optional(),
+  /**
+   * Must be true. Server-side rather than trusting the disabled button: the
+   * consent is the whole reason the non-refundable clause survives contact
+   * with a UK/EU consumer, so it can't be bypassed by posting directly.
+   */
+  withdrawalConsent: z.literal(true, {
+    message: "Please confirm you want the message sent straight away.",
+  }),
   sendTimezone: z
     .string()
     .max(64)
@@ -152,6 +160,8 @@ export async function POST(request: Request) {
         sendHour: plan === "DAILY" ? (parsed.data.sendHour ?? 6) : null,
         sendTimezone:
           plan === "DAILY" ? (parsed.data.sendTimezone ?? "UTC") : null,
+        withdrawalConsentAt: new Date(),
+        withdrawalConsentText: WITHDRAWAL_CONSENT_TEXT,
       },
     });
 

@@ -123,10 +123,25 @@ export default function TermsPage() {
           </a>{" "}
           and we will put it right. We would rather refund you than argue.
         </p>
+        <h3>Your statutory cancellation right</h3>
         <p>
-          Nothing here limits any statutory right of withdrawal or cancellation
-          you may have under consumer law in your country. Where such a right
-          applies, it takes precedence over this section.
+          If you are a consumer in the UK or EU, you normally have 14 days to
+          withdraw from a contract made online. Because a message is sent
+          immediately, we ask you to confirm at checkout that you want it sent
+          straight away and that you understand you lose that right once it has
+          been sent. You tick that box yourself, we record the exact wording
+          with your order, and we repeat it back to you in your receipt.
+        </p>
+        <p>
+          <strong>If you do not tick it, we cannot take the order</strong> —
+          rather than take your money and rely on a clause you never agreed to.
+          Until a message has actually been sent, the withdrawal right still
+          applies and you can ask us to cancel for a full refund.
+        </p>
+        <p>
+          Nothing here limits any other statutory right you may have under
+          consumer law in your country. Where such a right applies, it takes
+          precedence over this section.
         </p>
       </section>
 

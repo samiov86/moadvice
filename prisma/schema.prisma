@@ -175,6 +175,12 @@ model Order {
   sendHour     Int?
   sendTimezone String?
 
+  /// When the buyer consented to immediate performance, and the exact wording
+  /// they were shown. Stored rather than merely referenced so a chargeback or
+  /// consumer-law complaint can be answered with what was actually agreed.
+  withdrawalConsentAt   DateTime?
+  withdrawalConsentText String?
+
   paidAt    DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
