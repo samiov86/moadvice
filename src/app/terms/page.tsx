@@ -19,9 +19,8 @@ export default function TermsPage() {
       <section>
         <h2>Who you are contracting with</h2>
         <p>
-          {siteConfig.name} is a trading name of{" "}
-          <strong>{siteConfig.legal.name}</strong>, an individual trader based
-          at:
+          {siteConfig.name} is a trading name of {siteConfig.legal.name}, an
+          individual trader based at:
         </p>
         <p>
           {siteConfig.legal.addressLines.map((line) => (
@@ -139,8 +138,8 @@ export default function TermsPage() {
         </p>
         <h3>Everything else</h3>
         <p>
-          If something has genuinely gone wrong — a duplicate charge, a plan that
-          kept billing after you cancelled, a delivery failure — email{" "}
+          If something has genuinely gone wrong — a duplicate charge, a plan
+          that kept billing after you cancelled, a delivery failure — email{" "}
           <a href={`mailto:${siteConfig.supportEmail}`}>
             {siteConfig.supportEmail}
           </a>{" "}
@@ -185,11 +184,12 @@ export default function TermsPage() {
       <section>
         <h2>8. Availability</h2>
         <p>
-          We aim to deliver each daily message at approximately the time chosen when the plan was set up, in the timezone chosen with it.
-          Email delivery depends on providers we don't control, and we can't
-          guarantee that a given message reaches an inbox rather than a spam
-          folder. Occasional delay or non-delivery does not entitle you to a
-          refund, though repeated failure does — see section 6.
+          We aim to deliver each daily message at approximately the time chosen
+          when the plan was set up, in the timezone chosen with it. Email
+          delivery depends on providers we don't control, and we can't guarantee
+          that a given message reaches an inbox rather than a spam folder.
+          Occasional delay or non-delivery does not entitle you to a refund,
+          though repeated failure does — see section 6.
         </p>
       </section>
 
@@ -222,8 +222,9 @@ export default function TermsPage() {
         <h2>11. Changes</h2>
         <p>
           We may update these terms. If a change materially affects you and you
-          hold an active plan, we'll email you before it takes effect. Continuing
-          to use the service after that means you accept the new terms.
+          hold an active plan, we'll email you before it takes effect.
+          Continuing to use the service after that means you accept the new
+          terms.
         </p>
       </section>
 

@@ -20,14 +20,16 @@ export default function PrivacyPage() {
         <h2>What we collect</h2>
         <h3>If you send messages</h3>
         <ul>
-          <li>Your email address — for receipts, confirmations, and sign-in.</li>
+          <li>
+            Your email address — for receipts, confirmations, and sign-in.
+          </li>
           <li>
             Your orders and plans: which tone, which frequency, which recipient,
             and when.
           </li>
           <li>
-            A Stripe customer ID and subscription IDs. We never see or store your
-            card number, expiry, or CVC — those go directly to Stripe.
+            A Stripe customer ID and subscription IDs. We never see or store
+            your card number, expiry, or CVC — those go directly to Stripe.
           </li>
         </ul>
 
@@ -36,8 +38,8 @@ export default function PrivacyPage() {
           <li>Your email address.</li>
           <li>A first name, only if the sender supplied one.</li>
           <li>
-            A log of which messages were sent to you and when, so we don't repeat
-            one and so we can answer support questions.
+            A log of which messages were sent to you and when, so we don't
+            repeat one and so we can answer support questions.
           </li>
           <li>An opt-out token, so the unsubscribe link works.</li>
         </ul>
@@ -56,20 +58,23 @@ export default function PrivacyPage() {
         <h2>Anonymity works in one direction only</h2>
         <p>
           We know who sent what — we have to, in order to bill and to handle
-          abuse reports. The <strong>recipient</strong> never learns the sender's
-          identity from us. We do not reveal it on request, and the emails
-          contain nothing that would identify the sender.
+          abuse reports. The <strong>recipient</strong> never learns the
+          sender's identity from us. We do not reveal it on request, and the
+          emails contain nothing that would identify the sender.
         </p>
         <p>
-          The one exception is a valid legal order, or a credible report that the
-          service is being used to harass someone. We will comply with the law.
+          The one exception is a valid legal order, or a credible report that
+          the service is being used to harass someone. We will comply with the
+          law.
         </p>
       </section>
 
       <section>
         <h2>What we don't do</h2>
         <ul>
-          <li>We do not sell, rent, or share personal data with advertisers.</li>
+          <li>
+            We do not sell, rent, or share personal data with advertisers.
+          </li>
           <li>
             We do not use recipient addresses for marketing. The only mail an
             address receives is the messages that were paid for.
@@ -109,13 +114,11 @@ export default function PrivacyPage() {
           <li>
             Order and payment records: seven years, because tax law requires it.
           </li>
+          <li>Delivery logs: two years, then deleted.</li>
           <li>
-            Delivery logs: two years, then deleted.
-          </li>
-          <li>
-            Opted-out addresses: kept indefinitely in a suppression list. This is
-            deliberate — it is the only way to guarantee we never send to that
-            address again.
+            Opted-out addresses: kept indefinitely in a suppression list. This
+            is deliberate — it is the only way to guarantee we never send to
+            that address again.
           </li>
         </ul>
       </section>
@@ -123,9 +126,9 @@ export default function PrivacyPage() {
       <section>
         <h2>Your rights</h2>
         <p>
-          Depending on where you live, you may have the right to access, correct,
-          export, or delete your personal data, and to object to processing.
-          Email{" "}
+          Depending on where you live, you may have the right to access,
+          correct, export, or delete your personal data, and to object to
+          processing. Email{" "}
           <a href={`mailto:${siteConfig.supportEmail}`}>
             {siteConfig.supportEmail}
           </a>{" "}
@@ -153,10 +156,10 @@ export default function PrivacyPage() {
           your device, and does not build a profile or track you across sites.
         </p>
         <p>
-          Those events record only what was chosen: the plan, the tone, and which
-          step of the form. <strong>No email address is ever included</strong> —
-          not yours and certainly not the recipient's, who never agreed to
-          anything.
+          Those events record only what was chosen: the plan, the tone, and
+          which step of the form.{" "}
+          <strong>No email address is ever included</strong> — not yours and
+          certainly not the recipient's, who never agreed to anything.
         </p>
       </section>
 
@@ -176,7 +179,7 @@ export default function PrivacyPage() {
           </a>
         </p>
         <p>
-          The data controller is <strong>{siteConfig.legal.name}</strong>,{" "}
+          The data controller is {siteConfig.legal.name},{" "}
           {siteConfig.legal.addressInline}. We process sender data to perform
           the contract you entered into, and recipient data on the basis of our
           legitimate interest in delivering the message a sender paid for —

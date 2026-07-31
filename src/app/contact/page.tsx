@@ -29,8 +29,7 @@ export default function ContactPage() {
       <section>
         <h2>Postal address</h2>
         <p>
-          {siteConfig.name} is a trading name of{" "}
-          <strong>{siteConfig.legal.name}</strong>.
+          {siteConfig.name} is a trading name of {siteConfig.legal.name}.
         </p>
         <p>
           {siteConfig.legal.addressLines.map((line) => (
@@ -59,9 +58,9 @@ export default function ContactPage() {
 
         <h3>I want to cancel a daily plan</h3>
         <p>
-          Sign in at <Link href="/dashboard">your dashboard</Link> with the email
-          address you paid with, and cancel there in one click. No password
-          needed — we email you a link.
+          Sign in at <Link href="/dashboard">your dashboard</Link> with the
+          email address you paid with, and cancel there in one click. No
+          password needed — we email you a link.
         </p>
 
         <h3>Something was charged twice</h3>
@@ -79,17 +78,18 @@ export default function ContactPage() {
 
         <h3>Someone is using this to bother me</h3>
         <p>
-          Tell us and we will stop it immediately and permanently. Please include
-          the full email you received, headers if you can get them. We take this
-          seriously — anonymity here exists for kindness, and we remove people
-          who abuse it.
+          Tell us and we will stop it immediately and permanently. Please
+          include the full email you received, headers if you can get them. We
+          take this seriously — anonymity here exists for kindness, and we
+          remove people who abuse it.
         </p>
       </section>
 
       <section>
         <h2>Press and partnerships</h2>
         <p>
-          Same address. Mention what you're working on and we'll get back to you.
+          Same address. Mention what you're working on and we'll get back to
+          you.
         </p>
       </section>
     </LegalShell>
