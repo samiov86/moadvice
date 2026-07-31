@@ -12,8 +12,10 @@ const badgeVariants = cva(
         outline: "border border-border text-muted-foreground",
         solid: "bg-primary text-primary-foreground",
         muted: "bg-secondary text-secondary-foreground",
-        success: "bg-emerald-100 text-emerald-900",
-        warning: "bg-amber-100 text-amber-900",
+        // Token-driven rather than fixed Tailwind shades: emerald-100 on a
+        // dark background is a glaring block with unreadable text on it.
+        success: "bg-[var(--success-bg)] text-[var(--success-fg)]",
+        warning: "bg-[var(--warning-bg)] text-[var(--warning-fg)]",
         destructive: "bg-destructive/10 text-destructive",
       },
     },

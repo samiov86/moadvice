@@ -120,7 +120,7 @@ export default function HomePage() {
       <main className="flex-1">
         {/* ---------------------------------------------------------- Hero */}
         <section className="bg-warm-wash">
-          <div className="mx-auto grid w-full max-w-6xl gap-14 px-5 pb-20 pt-16 sm:px-8 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-16 lg:pb-28 lg:pt-24">
+          <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 pb-16 pt-10 sm:gap-14 sm:pb-20 sm:pt-16 sm:px-8 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-16 lg:pb-28 lg:pt-24">
             <div>
               <Badge variant="outline" className="bg-card/70">
                 <Sparkles className="size-3.5 text-primary" />
@@ -137,18 +137,28 @@ export default function HomePage() {
                 without your name on it, to someone who could use it this week.
               </p>
 
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:items-center">
                 <Button asChild size="lg">
                   <Link href="/send">
                     Send kind words <ArrowRight className="size-4" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline">
+                {/*
+                  Hidden on phones: it goes to the same place as the button
+                  above, and a second full-width block pushed the email preview
+                  — the most persuasive thing on the page — off the screen.
+                */}
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="hidden sm:inline-flex"
+                >
                   <Link href="/send">Try one for $1</Link>
                 </Button>
               </div>
 
-              <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+              <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground sm:mt-8">
                 {[
                   "No account for them",
                   "Anonymous by design",
@@ -438,12 +448,19 @@ export default function HomePage() {
         </section>
 
         {/* --------------------------------------------------- Final CTA */}
-        <section className="bg-warm-wash">
+        {/*
+          The one dark section on the page. Eight sections of cream-on-white
+          read as evenly weighted, so nothing signalled which part mattered;
+          inverting the close gives the page a spine and a definite ending.
+          Colours come from tokens that flip in dark mode — charcoal on cream
+          would vanish against a dark background.
+        */}
+        <section className="bg-[var(--contrast-bg)] text-[var(--contrast-fg)]">
           <div className="mx-auto w-full max-w-3xl px-5 py-20 text-center sm:px-8 lg:py-28">
             <h2 className="font-display text-3xl leading-tight text-balance sm:text-4xl">
               Someone you know is having a harder week than they've said
             </h2>
-            <p className="mx-auto mt-5 max-w-xl text-lg text-muted-foreground">
+            <p className="mx-auto mt-5 max-w-xl text-lg text-[var(--contrast-fg-muted)]">
               It costs a dollar to do something about it, and they will never
               know it was you.
             </p>

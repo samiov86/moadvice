@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:is(.dark *));
+/* No theme toggle exists, so dark styling follows the OS preference. */
+@custom-variant dark (@media (prefers-color-scheme: dark));
 
 /**
  * Mo Advice palette.
@@ -47,9 +48,30 @@
   --border: #ebdfd2;
   --input: #e3d5c6;
   --ring: var(--coral);
+
+  /* Deliberately inverted against --background, for the one dark section. */
+  --contrast-bg: var(--charcoal);
+  --contrast-fg: var(--cream);
+  --contrast-fg-muted: #b8ab9c;
+
+  /* Status colours, so badges aren't hardcoded to light-mode Tailwind shades. */
+  --success-bg: #dcf0e4;
+  --success-fg: #15503a;
+  --warning-bg: #fbeacd;
+  --warning-fg: #6b4708;
 }
 
-.dark {
+@media (prefers-color-scheme: dark) {
+  :root {
+  /*
+    The brand primitives, not just the semantic tokens. `bg-warm-wash` mixes
+    --peach and --sand directly, so leaving them at their light values painted
+    a pale haze over the dark page and washed out the headline sitting on it.
+  */
+  --peach: #3a2a22;
+  --sand: #2a2420;
+  --coral-deep: #f08e75;
+
   --background: #1c1917;
   --foreground: #f3ece4;
 
@@ -77,6 +99,17 @@
   --border: #3a332d;
   --input: #463d35;
   --ring: #e87a60;
+
+  /* Charcoal on a near-black page would disappear — lift it instead. */
+  --contrast-bg: #302a25;
+  --contrast-fg: #f6efe7;
+  --contrast-fg-muted: #b2a596;
+
+  --success-bg: #1c3a2c;
+  --success-fg: #a7e0c0;
+  --warning-bg: #3d2f16;
+  --warning-fg: #f0cd8d;
+  }
 }
 
 @theme inline {
