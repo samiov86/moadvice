@@ -22,7 +22,7 @@ import {
   faqSchema,
   jsonLd,
   organizationSchema,
-  productSchema,
+  serviceSchema,
   websiteSchema,
 } from "@/lib/structured-data";
 
@@ -101,7 +101,7 @@ export default function HomePage() {
   const schemas = [
     organizationSchema(),
     websiteSchema(),
-    productSchema(),
+    serviceSchema(),
     faqSchema(FAQS),
   ];
 

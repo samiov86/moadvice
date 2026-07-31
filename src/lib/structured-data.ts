@@ -42,16 +42,31 @@ export function websiteSchema() {
   };
 }
 
-/** The two things you can buy, priced from the same constants the page renders. */
-export function productSchema() {
+/**
+ * The two things you can buy, priced from the same constants the page renders.
+ *
+ * Typed as a Service, not a Product. Product invites Google to validate the
+ * page against its Merchant listings rules, which demand `shippingDetails` and
+ * `hasMerchantReturnPolicy` — fields that only make sense for physical goods.
+ * Search Console duly flagged both as missing.
+ *
+ * Adding them would mean describing shipping rates and delivery times for an
+ * email, which is simply untrue, and false markup is how structured data earns
+ * a penalty instead of a rich result. Service is what this actually is: an
+ * intangible thing performed for someone, with a price. Offers remain valid on
+ * it, so the pricing is still expressed — just not as merchandise.
+ */
+export function serviceSchema() {
   return {
     "@context": "https://schema.org",
-    "@type": "Product",
-    "@id": absoluteUrl("/#product"),
+    "@type": "Service",
+    "@id": absoluteUrl("/#service"),
     name: `${siteConfig.name} — anonymous compliments by email`,
     description: siteConfig.description,
+    serviceType: "Anonymous encouragement messages delivered by email",
     image: absoluteUrl("/opengraph-image"),
-    brand: { "@type": "Brand", name: siteConfig.name },
+    provider: { "@id": absoluteUrl("/#organization") },
+    areaServed: "Worldwide",
     offers: Object.values(PLANS).map((plan) => ({
       "@type": "Offer",
       name: plan.name,
