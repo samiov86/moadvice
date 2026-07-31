@@ -140,21 +140,22 @@ own timezone, so the endpoint must be polled **hourly**. Work is claimed by
 `nextSendAt <= now()`, so a run outside anyone's window finds nothing due and
 exits in milliseconds.
 
-`vercel.json` schedules it hourly:
+**Hourly polling comes from GitHub Actions, not from `vercel.json`.**
+
+`.github/workflows/hourly-send.yml` calls the endpoint every hour. Add
+`CRON_SECRET` as a repository secret (Settings → Secrets and variables →
+Actions) and it works with no further setup.
+
+`vercel.json` keeps a once-daily cron as a safety net:
 
 ```json
-{ "crons": [{ "path": "/api/cron/daily", "schedule": "0 * * * *" }] }
+{ "crons": [{ "path": "/api/cron/daily", "schedule": "0 6 * * *" }] }
 ```
 
-> **On the Vercel Hobby plan that only fires once a day.** Messages still go
-> out, but at whatever hour the single run happens rather than the time the
-> sender chose. Two ways to fix it:
->
-> - **Free:** the included `.github/workflows/hourly-send.yml` calls the
->   endpoint every hour from GitHub Actions. Add `CRON_SECRET` as a repository
->   secret (Settings → Secrets and variables → Actions) and it just works.
-> - **Paid:** a Vercel Pro plan runs the cron in `vercel.json` hourly, and the
->   workflow can be deleted.
+> ⚠️ **Do not set that to `0 * * * *` on a Hobby plan.** Vercel rejects cron
+> schedules more frequent than once a day, and the *deployment itself fails* —
+> your last good build stays live and a push appears to do nothing. On a Pro
+> plan you can move to hourly there and delete the workflow.
 
 Set `CRON_SECRET` (`openssl rand -hex 32`) as a Vercel environment variable —
 Vercel sends it automatically as `Authorization: Bearer …`, and the route
