@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/resend";
 import { absoluteUrl } from "@/lib/site";
 import { pickTemplateForRecipient, subjectForDelivery } from "@/lib/messages";
+import { alertDeliveryFailure } from "@/lib/alerts";
 import { recipientMessageEmail } from "@/emails/recipient-message";
 
 export interface DeliverMessageParams {
@@ -124,6 +125,20 @@ export async function deliverMessage({
       error: result.ok ? null : (result.error ?? "Unknown error"),
     },
   });
+
+  if (!result.ok) {
+    // Every delivery path runs through here, so this is the one place that
+    // guarantees a failure reaches a human rather than only the database.
+    await alertDeliveryFailure({
+      recipientEmail: recipient.email,
+      error: result.error ?? "Unknown error",
+      context: subscriptionId
+        ? `subscription ${subscriptionId}`
+        : orderId
+          ? `one-off order ${orderId}`
+          : "unattributed send",
+    });
+  }
 
   return {
     status: result.ok ? "SENT" : "FAILED",

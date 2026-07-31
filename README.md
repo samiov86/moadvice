@@ -77,6 +77,15 @@ In CI/production use `npm run db:deploy` (`prisma migrate deploy`) instead of
    `Mo Advice <words@moadvice.com>`. Anything else will fail to send.
 4. `EMAIL_REPLY_TO` is optional. Leaving it blank is defensible — replies to an
    anonymous message have nowhere good to go.
+5. **Add the delivery webhook.** Resend → Webhooks → new endpoint at
+   `https://moadvice.com/api/resend/webhook`, subscribed to `email.delivered`,
+   `email.bounced` and `email.complained`. Put its signing secret in
+   `RESEND_WEBHOOK_SECRET`.
+
+   Without it, `MessageSent.status` stops at `SENT` — meaning *Resend accepted
+   it*, not that it arrived. A mistyped address bounces minutes later and the
+   sender is still told it was delivered. The webhook is what promotes `SENT` to
+   `DELIVERED`, marks bounces, and suppresses dead addresses.
 
 ### 3. Stripe
 

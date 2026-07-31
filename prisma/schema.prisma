@@ -42,8 +42,16 @@ enum SubscriptionStatus {
   PAUSED
 }
 
+/// The lifecycle of one email.
+///
+/// SENT only means Resend accepted it — the mailbox may still reject it later.
+/// DELIVERED, BOUNCED and COMPLAINED are set afterwards by the Resend webhook,
+/// which is the only source of truth about what actually happened.
 enum DeliveryStatus {
   SENT
+  DELIVERED
+  BOUNCED
+  COMPLAINED
   FAILED
   SKIPPED
 }
@@ -249,11 +257,15 @@ model MessageSent {
   theme    MessageCategory
   subject  String
   status   DeliveryStatus  @default(SENT)
-  /// Resend's message id, useful for support lookups.
+  /// Resend's message id. Also how the Resend webhook finds this row again.
   providerMessageId String?
   error             String?
 
   sentAt DateTime @default(now())
+  /// Set when Resend confirms the mailbox accepted it.
+  deliveredAt DateTime?
+  /// Set on a bounce or spam complaint.
+  failedAt    DateTime?
 
   recipient    Recipient       @relation(fields: [recipientId], references: [id], onDelete: Cascade)
   template     MessageTemplate @relation(fields: [templateId], references: [id])
@@ -263,4 +275,6 @@ model MessageSent {
   @@index([recipientId, sentAt])
   @@index([subscriptionId])
   @@index([templateId])
+  /// The Resend webhook looks rows up by this and nothing else.
+  @@index([providerMessageId])
 }

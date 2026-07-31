@@ -28,6 +28,12 @@ const serverSchema = z.object({
   /** e.g. `Mo Advice <words@moadvice.com>` — must be a verified Resend domain. */
   EMAIL_FROM: z.string().min(1),
   EMAIL_REPLY_TO: z.string().min(1).optional(),
+  /**
+   * Signing secret for the Resend webhook (`whsec_…`). Optional so an existing
+   * deployment keeps working before the endpoint is created — without it,
+   * /api/resend/webhook rejects everything and SENT never becomes DELIVERED.
+   */
+  RESEND_WEBHOOK_SECRET: z.string().min(1).optional(),
 
   // Auth (NextAuth v5 / Auth.js)
   AUTH_SECRET: z.string().min(1),

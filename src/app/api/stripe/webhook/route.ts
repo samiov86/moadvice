@@ -6,7 +6,9 @@ import { env } from "@/lib/env";
 import { stripe } from "@/lib/stripe";
 import { deliverMessage } from "@/lib/delivery";
 import { sendEmail } from "@/lib/resend";
+import { alertDeliveryFailure } from "@/lib/alerts";
 import { senderReceiptEmail } from "@/emails/sender-receipt";
+import { deliveryFailedEmail } from "@/emails/delivery-failed";
 import { subscriptionStartedEmail } from "@/emails/subscription-started";
 import { subscriptionCancelledEmail } from "@/emails/subscription-cancelled";
 import { nextUtcHour } from "@/lib/utils";
@@ -114,28 +116,105 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   });
 
   if (order.plan === "ONE_OFF") {
-    await fulfilOneOff(order.id, order.recipientId, order.theme);
-    await sendOneOffReceipt(order.id);
+    const delivered = await fulfilOneOff(
+      order.id,
+      order.recipientId,
+      order.theme,
+    );
+
+    // Only claim it's on its way if it actually went. Otherwise give the money
+    // back rather than leaving the sender with a receipt for nothing.
+    if (delivered) {
+      await sendOneOffReceipt(order.id);
+    } else {
+      await refundUndeliveredOrder(order.id);
+    }
     return;
   }
 
   await fulfilDailyPlan(session, order.id);
 }
 
+/** Returns true when the message actually went out. */
 async function fulfilOneOff(
   orderId: string,
   recipientId: string,
   theme: "PERSONAL" | "PROFESSIONAL",
-) {
-  const alreadySent = await prisma.messageSent.count({ where: { orderId } });
-  if (alreadySent > 0) return;
+): Promise<boolean> {
+  const previous = await prisma.messageSent.findFirst({
+    where: { orderId },
+    select: { status: true },
+  });
 
-  await deliverMessage({
+  // A retried webhook must not send twice — report the earlier outcome instead.
+  if (previous) return previous.status === "SENT";
+
+  const result = await deliverMessage({
     recipientId,
     theme,
     orderId,
     isDaily: false,
     idempotencyKey: `order_${orderId}`,
+  });
+
+  return result.status === "SENT";
+}
+
+/**
+ * We charged for a message that never arrived, so hand the money back.
+ *
+ * Terms §6 already promises this ("If a message was never delivered because of
+ * a fault on our side, we will refund it in full"), and a one-off has no second
+ * chance to make good — there is no next day, unlike a daily plan. Doing it
+ * automatically is both what we've written down and cheaper than a chargeback.
+ */
+async function refundUndeliveredOrder(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { recipient: true, user: true },
+  });
+
+  if (!order || order.status === "REFUNDED") return;
+
+  let refunded = false;
+
+  if (order.stripePaymentIntentId) {
+    try {
+      await stripe.refunds.create(
+        { payment_intent: order.stripePaymentIntentId, reason: "requested_by_customer" },
+        { idempotencyKey: `refund_${order.id}` },
+      );
+      refunded = true;
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { status: "REFUNDED" },
+      });
+    } catch (error) {
+      console.error(`[stripe] refund failed for order ${order.id}`, error);
+    }
+  }
+
+  const { subject, html, text } = deliveryFailedEmail({
+    recipientEmail: order.recipient.email,
+    amountCents: order.amountCents,
+    currency: order.currency,
+    orderId: order.id,
+    refunded,
+  });
+
+  await sendEmail({
+    to: order.user.email,
+    subject,
+    html,
+    text,
+    idempotencyKey: `delivery_failed_${order.id}`,
+  });
+
+  await alertDeliveryFailure({
+    recipientEmail: order.recipient.email,
+    error: "One-off delivery failed",
+    context: `one-off order ${order.id}`,
+    refunded,
   });
 }
 

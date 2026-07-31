@@ -15,6 +15,7 @@ import {
 import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/utils";
+import type { DeliveryStatus } from "@prisma/client";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -213,17 +214,7 @@ export default async function DashboardPage() {
 
                         <div className="flex items-center gap-3 text-sm text-muted-foreground">
                           <span>{formatDate(order.paidAt ?? order.createdAt)}</span>
-                          {delivery?.status === "SENT" ? (
-                            <Badge variant="success">
-                              <Mail className="size-3.5" /> Delivered
-                            </Badge>
-                          ) : delivery?.status === "SKIPPED" ? (
-                            <Badge variant="warning">Opted out</Badge>
-                          ) : delivery?.status === "FAILED" ? (
-                            <Badge variant="destructive">Failed</Badge>
-                          ) : (
-                            <Badge variant="outline">Queued</Badge>
-                          )}
+                          <DeliveryBadge status={delivery?.status} />
                         </div>
                       </li>
                     );
@@ -285,6 +276,34 @@ export default async function DashboardPage() {
       <SiteFooter />
     </>
   );
+}
+
+/**
+ * "Sent" and "Delivered" are different claims and used to be conflated.
+ * SENT means Resend accepted it; only the Resend webhook can promote that to
+ * DELIVERED, or to BOUNCED once a mailbox rejects it.
+ */
+function DeliveryBadge({ status }: { status?: DeliveryStatus }) {
+  switch (status) {
+    case "DELIVERED":
+      return (
+        <Badge variant="success">
+          <Mail className="size-3.5" /> Delivered
+        </Badge>
+      );
+    case "SENT":
+      return <Badge variant="outline">Sent</Badge>;
+    case "BOUNCED":
+      return <Badge variant="destructive">Bounced</Badge>;
+    case "COMPLAINED":
+      return <Badge variant="destructive">Marked as spam</Badge>;
+    case "SKIPPED":
+      return <Badge variant="warning">Opted out</Badge>;
+    case "FAILED":
+      return <Badge variant="destructive">Failed</Badge>;
+    default:
+      return <Badge variant="outline">Queued</Badge>;
+  }
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
