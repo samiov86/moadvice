@@ -30,9 +30,23 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
     "use server";
     const email = String(formData.get("email") ?? "").trim();
     const callbackUrl = String(formData.get("callbackUrl") ?? "/dashboard");
-    await signIn("resend", { email, redirectTo: callbackUrl });
-  }
 
+    try {
+      // `redirect: false` stops Auth.js handing off to its own verify-request
+      // page, which the v5 beta cannot handle behind a custom `pages` config
+      // (UnknownAction: verify-request). The email still sends; we just do the
+      // redirect ourselves.
+      await signIn("resend", {
+        email,
+        redirectTo: callbackUrl,
+        redirect: false,
+      });
+    } catch {
+      redirect("/signin?error=EmailSignin");
+    }
+
+    redirect("/signin/check");
+  }
   return (
     <>
       <SiteHeader />
