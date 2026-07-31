@@ -147,7 +147,7 @@ export default function TermsPage() {
       <section>
         <h2>8. Availability</h2>
         <p>
-          We aim to deliver daily messages at approximately 06:00 UTC each day.
+          We aim to deliver each daily message at approximately the time chosen when the plan was set up, in the timezone chosen with it.
           Email delivery depends on providers we don't control, and we can't
           guarantee that a given message reaches an inbox rather than a spam
           folder. Occasional delay or non-delivery does not entitle you to a

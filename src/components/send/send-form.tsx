@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioCard } from "@/components/ui/radio-group";
 import { EmailPreview } from "@/components/email-preview";
 import { PLANS, THEMES, type PlanId, type ThemeId } from "@/lib/site";
+import { SEND_HOURS } from "@/lib/timezone";
 import { cn } from "@/lib/utils";
 
 const STEPS = ["Who", "Tone", "How often", "Pay"] as const;
@@ -23,6 +24,37 @@ interface FormState {
   theme: ThemeId;
   plan: PlanId;
   senderEmail: string;
+  sendHour: number;
+  sendTimezone: string;
+}
+
+/**
+ * The sender picks the *recipient's* zone, which we can't detect — so we
+ * default to the sender's own and let them change it. Same country covers the
+ * overwhelming majority of sends, and being one zone out is a far smaller error
+ * than everyone getting 06:00 UTC.
+ */
+function detectTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+
+/**
+ * Every zone the browser knows. `supportedValuesOf` is missing in older
+ * engines, so fall back to the detected zone plus UTC rather than rendering an
+ * empty select.
+ */
+function allTimeZones(detected: string): string[] {
+  try {
+    const supported = Intl.supportedValuesOf?.("timeZone");
+    if (supported?.length) return supported;
+  } catch {
+    // fall through
+  }
+  return Array.from(new Set([detected, "UTC"]));
 }
 
 export interface SendFormProps {
@@ -50,7 +82,23 @@ export function SendForm({
     theme: "PERSONAL",
     plan: initialPlan,
     senderEmail: initialSenderEmail,
+    // Resolved on the client only — the server has no idea where anyone is,
+    // and guessing during SSR would cause a hydration mismatch.
+    sendHour: 8,
+    sendTimezone: "UTC",
   });
+
+  const [timezones, setTimezones] = React.useState<string[]>(["UTC"]);
+
+  React.useEffect(() => {
+    const detected = detectTimeZone();
+    setTimezones(allTimeZones(detected));
+    setForm((previous) =>
+      previous.sendTimezone === "UTC"
+        ? { ...previous, sendTimezone: detected }
+        : previous,
+    );
+  }, []);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((previous) => ({ ...previous, [key]: value }));
@@ -133,6 +181,9 @@ export function SendForm({
           senderEmail: form.senderEmail.trim(),
           theme: form.theme,
           plan: form.plan,
+          ...(form.plan === "DAILY"
+            ? { sendHour: form.sendHour, sendTimezone: form.sendTimezone }
+            : {}),
         }),
       });
 
@@ -295,11 +346,65 @@ export function SendForm({
               </RadioGroup>
 
               {form.plan === "DAILY" && (
-                <p className="rounded-xl border border-border bg-secondary/60 px-4 py-3 text-sm text-muted-foreground">
-                  The first message goes out straight away. After that, one
-                  arrives every morning at 6:00 AM UTC. Cancel any time — you
-                  keep the days you've paid for.
-                </p>
+                <div className="space-y-4 rounded-2xl border border-border bg-secondary/40 p-5">
+                  <div>
+                    <h3 className="font-display text-lg">
+                      When should it arrive?
+                    </h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      In <em>their</em> time, not yours — so &ldquo;morning&rdquo;
+                      means morning where they are.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="sendHour">Time of day</Label>
+                      <select
+                        id="sendHour"
+                        value={form.sendHour}
+                        onChange={(e) =>
+                          update("sendHour", Number(e.target.value))
+                        }
+                        className="h-12 w-full rounded-xl border border-input bg-card px-4 text-base text-foreground shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25"
+                      >
+                        {SEND_HOURS.map((option) => (
+                          <option key={option.hour} value={option.hour}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="sendTimezone">Their timezone</Label>
+                      <select
+                        id="sendTimezone"
+                        value={form.sendTimezone}
+                        onChange={(e) =>
+                          update("sendTimezone", e.target.value)
+                        }
+                        className="h-12 w-full rounded-xl border border-input bg-card px-4 text-base text-foreground shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25"
+                      >
+                        {timezones.map((zone) => (
+                          <option key={zone} value={zone}>
+                            {zone.replace(/_/g, " ")}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground">
+                    The first message goes out straight away. After that, one
+                    arrives every day at{" "}
+                    <strong className="font-medium text-foreground">
+                      {SEND_HOURS.find((h) => h.hour === form.sendHour)?.label}
+                    </strong>{" "}
+                    their time. Cancel any time — you keep the days you&apos;ve
+                    paid for.
+                  </p>
+                </div>
               )}
             </StepPanel>
           )}
@@ -344,6 +449,12 @@ export function SendForm({
                 <Summary label="Plan">
                   {plan.name} · {plan.price} {plan.priceSuffix}
                 </Summary>
+                {form.plan === "DAILY" && (
+                  <Summary label="Arrives">
+                    {SEND_HOURS.find((h) => h.hour === form.sendHour)?.label}{" "}
+                    · {form.sendTimezone.replace(/_/g, " ")}
+                  </Summary>
+                )}
                 <Summary label="Total today" emphasis>
                   {plan.price}
                 </Summary>

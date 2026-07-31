@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { env } from "@/lib/env";
 import { deliverMessage } from "@/lib/delivery";
-import { nextUtcHour } from "@/lib/utils";
+import { nextLocalHour } from "@/lib/timezone";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,7 +41,8 @@ export async function GET(request: Request) {
       id: true,
       recipientId: true,
       theme: true,
-      sendHourUtc: true,
+      sendHour: true,
+      sendTimezone: true,
       currentPeriodEnd: true,
       cancelAtPeriodEnd: true,
     },
@@ -85,7 +86,11 @@ export async function GET(request: Request) {
       data: {
         // Always advance, even on failure — a broken address must not cause
         // the same subscription to be retried in a tight loop all day.
-        nextSendAt: nextUtcHour(subscription.sendHourUtc, now),
+        nextSendAt: nextLocalHour(
+          subscription.sendHour,
+          subscription.sendTimezone,
+          now,
+        ),
         ...(result.status === "SENT"
           ? { lastSentAt: now, sentCount: { increment: 1 } }
           : {}),

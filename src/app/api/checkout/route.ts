@@ -8,6 +8,7 @@ import { stripe, ensureStripeCustomer } from "@/lib/stripe";
 import { PLANS, absoluteUrl } from "@/lib/site";
 import { normalizeEmail } from "@/lib/utils";
 import { clientIpFrom, ipRateLimit, senderRateLimit } from "@/lib/rate-limit";
+import { isValidTimeZone } from "@/lib/timezone";
 
 export const runtime = "nodejs";
 
@@ -17,6 +18,17 @@ const checkoutSchema = z.object({
   senderEmail: z.string().trim().min(3).max(254).email(),
   theme: z.enum(["PERSONAL", "PROFESSIONAL"]),
   plan: z.enum(["ONE_OFF", "DAILY"]),
+  /** Daily plans only — when the recipient should get it, in their own time. */
+  sendHour: z.coerce.number().int().min(0).max(23).optional(),
+  sendTimezone: z
+    .string()
+    .max(64)
+    .optional()
+    // Validated against the runtime's own zone database rather than a regex:
+    // a plausible-looking but unknown zone would silently fall back to UTC.
+    .refine((tz) => tz === undefined || isValidTimeZone(tz), {
+      message: "Unrecognised timezone",
+    }),
 });
 
 /**
@@ -136,6 +148,10 @@ export async function POST(request: Request) {
         amountCents: planConfig.amountCents,
         currency: planConfig.currency,
         status: "PENDING",
+        // Only meaningful for a daily plan; a one-off sends on payment.
+        sendHour: plan === "DAILY" ? (parsed.data.sendHour ?? 6) : null,
+        sendTimezone:
+          plan === "DAILY" ? (parsed.data.sendTimezone ?? "UTC") : null,
       },
     });
 

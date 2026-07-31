@@ -73,7 +73,7 @@ export default async function SendSuccessPage({
                     <strong className="font-medium text-foreground">
                       {order.recipient.name?.trim() || order.recipient.email}
                     </strong>{" "}
-                    now, and a new one will arrive every morning at 6:00 AM UTC.
+                    now, and a new one will arrive at the same time every day.
                   </>
                 ) : (
                   <>

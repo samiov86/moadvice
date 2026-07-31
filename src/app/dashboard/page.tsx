@@ -14,7 +14,8 @@ import {
 } from "@/app/dashboard/subscription-actions";
 import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatDate, formatDateTime, formatMoney } from "@/lib/utils";
+import { formatDate, formatMoney } from "@/lib/utils";
+import { describeSendTime, formatInZone } from "@/lib/timezone";
 import type { DeliveryStatus } from "@prisma/client";
 
 export const metadata: Metadata = {
@@ -121,7 +122,12 @@ export default async function DashboardPage() {
                               {subscription.recipient.email} ·{" "}
                               {subscription.theme === "PERSONAL"
                                 ? "Personal"
-                                : "Professional"}
+                                : "Professional"}{" "}
+                              · daily at{" "}
+                              {describeSendTime(
+                                subscription.sendHour,
+                                subscription.sendTimezone,
+                              )}
                             </p>
                           </div>
 
@@ -159,11 +165,16 @@ export default async function DashboardPage() {
                             }`}
                           />
                           <Stat
+                            // Shown in the recipient's zone: "6am UTC" means
+                            // nothing to a sender picking a time for Sydney.
                             label="Next message"
                             value={
                               subscription.recipient.unsubscribedAt
                                 ? "Paused — they opted out"
-                                : formatDateTime(subscription.nextSendAt)
+                                : `${formatInZone(
+                                    subscription.nextSendAt,
+                                    subscription.sendTimezone,
+                                  )} · ${subscription.sendTimezone.replace(/_/g, " ")}`
                             }
                           />
                           <Stat

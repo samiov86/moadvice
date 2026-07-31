@@ -135,27 +135,35 @@ the same address reveals their history.
 
 ### 5. Cron
 
-`vercel.json` schedules `/api/cron/daily` **hourly**:
+Senders choose what time their recipient receives a message, in the recipient's
+own timezone, so the endpoint must be polled **hourly**. Work is claimed by
+`nextSendAt <= now()`, so a run outside anyone's window finds nothing due and
+exits in milliseconds.
+
+`vercel.json` schedules it hourly:
 
 ```json
 { "crons": [{ "path": "/api/cron/daily", "schedule": "0 * * * *" }] }
 ```
 
-Hourly rather than daily on purpose: work is claimed by `nextSendAt <= now()`, so a
-missed or slow run self-heals within the hour instead of skipping someone's day. Runs
-outside the send window find nothing due and exit immediately.
+> **On the Vercel Hobby plan that only fires once a day.** Messages still go
+> out, but at whatever hour the single run happens rather than the time the
+> sender chose. Two ways to fix it:
+>
+> - **Free:** the included `.github/workflows/hourly-send.yml` calls the
+>   endpoint every hour from GitHub Actions. Add `CRON_SECRET` as a repository
+>   secret (Settings → Secrets and variables → Actions) and it just works.
+> - **Paid:** a Vercel Pro plan runs the cron in `vercel.json` hourly, and the
+>   workflow can be deleted.
 
-Set `CRON_SECRET` (`openssl rand -hex 32`) as a Vercel environment variable — Vercel
-then sends it automatically as `Authorization: Bearer …`, and the route rejects
-anything else.
-
-> **Vercel Hobby plan** only permits one cron invocation per day. Either upgrade, or
-> change the schedule to `0 6 * * *` and accept that a failed run skips a day.
+Set `CRON_SECRET` (`openssl rand -hex 32`) as a Vercel environment variable —
+Vercel sends it automatically as `Authorization: Bearer …`, and the route
+rejects anything else.
 
 Trigger it by hand:
 
 ```bash
-curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/daily
+curl -H "Authorization: Bearer $CRON_SECRET" https://moadvice.com/api/cron/daily
 ```
 
 ---
@@ -278,8 +286,8 @@ so edits update in place and removed entries are deactivated rather than deleted
 
 - **AI-generated messages** — swap `pickTemplateForRecipient` in `src/lib/messages.ts`
   for a generator. `deliverMessage` only needs a `headline` and `body`.
-- **Per-recipient send time** — `Subscription.sendHourUtc` is already a column; expose
-  it in the send flow and the hourly cron does the rest.
+- **Pause rather than cancel** — a `PAUSED` status already exists on
+  `SubscriptionStatus`; wire it to Stripe's pause_collection.
 - **Corporate plans** — add a quantity to the daily price and fan out over a recipient
   list; the delivery path is per-recipient already.
 - **Admin panel** — `MessageSent` carries status, error, and Resend message ID for

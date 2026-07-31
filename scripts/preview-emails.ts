@@ -70,7 +70,7 @@ async function main() {
         theme: "PROFESSIONAL",
         amountCents: 500,
         currency: "usd",
-        sendHourUtc: 6,
+        sendTimeLabel: "8:00 AM Europe/London",
         nextSendAt: new Date("2026-07-30T06:00:00Z"),
         subscriptionId: "sub_preview123",
       }),

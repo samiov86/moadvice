@@ -20,7 +20,8 @@ export interface SubscriptionStartedEmailParams {
   theme: "PERSONAL" | "PROFESSIONAL";
   amountCents: number;
   currency: string;
-  sendHourUtc: number;
+  /** Already rendered, e.g. "8:00 AM Europe/London". */
+  sendTimeLabel: string;
   nextSendAt: Date;
   subscriptionId: string;
 }
@@ -32,13 +33,13 @@ export function subscriptionStartedEmail({
   theme,
   amountCents,
   currency,
-  sendHourUtc,
+  sendTimeLabel,
   nextSendAt,
   subscriptionId,
 }: SubscriptionStartedEmailParams) {
   const who = recipientName?.trim() || recipientEmail;
   const subject = `Daily words for ${who} — starting now`;
-  const hourLabel = `${String(sendHourUtc).padStart(2, "0")}:00 UTC`;
+  const hourLabel = sendTimeLabel;
 
   const html = emailShell({
     preheader: `The first message is on its way. The next one arrives at ${hourLabel}.`,

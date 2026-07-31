@@ -170,6 +170,11 @@ model Order {
   /// Free-text note the sender may add; never shown to the recipient.
   senderNote String?
 
+  /// Delivery time chosen at checkout, carried through to the Subscription the
+  /// webhook creates. Null for one-offs, which send immediately.
+  sendHour     Int?
+  sendTimezone String?
+
   paidAt    DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -199,8 +204,15 @@ model Subscription {
   stripeCustomerId     String
   stripePriceId        String?
 
-  /// Hour of day (UTC) the daily message goes out. Defaults to 06:00 UTC.
-  sendHourUtc Int @default(6)
+  /// Local hour of day (0-23) the daily message goes out.
+  sendHour Int @default(6)
+
+  /// IANA zone the hour above is expressed in, e.g. "Europe/London".
+  ///
+  /// Stored alongside the hour rather than collapsed into a UTC hour on
+  /// purpose: the UTC equivalent of "8am local" shifts by an hour at each DST
+  /// boundary, so a fixed UTC hour would drift twice a year.
+  sendTimezone String @default("UTC")
 
   /// Delivery bookkeeping — the cron picks up rows where nextSendAt <= now().
   nextSendAt DateTime?

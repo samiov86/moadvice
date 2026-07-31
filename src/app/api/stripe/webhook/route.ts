@@ -11,7 +11,7 @@ import { senderReceiptEmail } from "@/emails/sender-receipt";
 import { deliveryFailedEmail } from "@/emails/delivery-failed";
 import { subscriptionStartedEmail } from "@/emails/subscription-started";
 import { subscriptionCancelledEmail } from "@/emails/subscription-cancelled";
-import { nextUtcHour } from "@/lib/utils";
+import { nextLocalHour, describeSendTime } from "@/lib/timezone";
 
 export const runtime = "nodejs";
 /** Stripe signature verification needs the untouched request body. */
@@ -267,7 +267,10 @@ async function fulfilDailyPlan(
   const stripeSubscription =
     await stripe.subscriptions.retrieve(stripeSubscriptionId);
 
-  const sendHourUtc = env.DAILY_SEND_HOUR_UTC;
+  // Chosen by the sender at checkout; the env default only covers plans
+  // created before the schedule picker existed.
+  const sendHour = order.sendHour ?? env.DAILY_SEND_HOUR_UTC;
+  const sendTimezone = order.sendTimezone ?? "UTC";
   const now = new Date();
 
   const existing = await prisma.subscription.findUnique({
@@ -288,9 +291,10 @@ async function fulfilDailyPlan(
           ? stripeSubscription.customer
           : stripeSubscription.customer.id,
       stripePriceId: stripeSubscription.items.data[0]?.price.id ?? null,
-      sendHourUtc,
+      sendHour,
+      sendTimezone,
       // First message goes out immediately; the cron picks up from tomorrow.
-      nextSendAt: nextUtcHour(sendHourUtc, now),
+      nextSendAt: nextLocalHour(sendHour, sendTimezone, now),
       currentPeriodEnd: periodEndOf(stripeSubscription),
       cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
     },
@@ -325,8 +329,9 @@ async function fulfilDailyPlan(
     theme: order.theme,
     amountCents: order.amountCents,
     currency: order.currency,
-    sendHourUtc,
-    nextSendAt: subscription.nextSendAt ?? nextUtcHour(sendHourUtc, now),
+    sendTimeLabel: describeSendTime(sendHour, sendTimezone),
+    nextSendAt:
+      subscription.nextSendAt ?? nextLocalHour(sendHour, sendTimezone, now),
     subscriptionId: subscription.id,
   });
 
@@ -380,7 +385,8 @@ async function handleSubscriptionChange(
       // null nextSendAt and would otherwise never send again.
       nextSendAt:
         status === "ACTIVE"
-          ? (existing.nextSendAt ?? nextUtcHour(existing.sendHourUtc))
+          ? (existing.nextSendAt ??
+            nextLocalHour(existing.sendHour, existing.sendTimezone))
           : null,
     },
   });

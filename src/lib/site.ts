@@ -64,7 +64,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     currency: "usd",
     blurb: "One new message every morning, for as long as you like.",
     features: [
-      "A different message every day at 6:00 AM UTC",
+      "A different message every day, at a time you choose",
       "Never repeats until the whole bank is used",
       "Cancel any time in one click",
       "Run several at once, for different people",

@@ -1,0 +1,49 @@
+# Hourly trigger for the daily send.
+#
+# Why this exists: senders choose what time their recipient gets a message, in
+# the recipient's own timezone. Serving that needs the endpoint polled every
+# hour — but Vercel's Hobby plan allows a cron job to fire only once a day, so
+# `vercel.json` alone can't do it. GitHub Actions can, for free.
+#
+# Setup (once):
+#   Repo → Settings → Secrets and variables → Actions → New repository secret
+#     Name:  CRON_SECRET
+#     Value: the same value set in Vercel
+#
+# If you move to a Vercel Pro plan, the hourly cron in vercel.json covers this
+# on its own and this workflow can be deleted.
+#
+# Note: GitHub's scheduler is best-effort and can run several minutes late,
+# especially on the hour. That's fine here — work is claimed by `nextSendAt <=
+# now`, so a late run still sends, and an early one finds nothing due.
+
+name: Hourly send
+
+on:
+  schedule:
+    # Ten past the hour: GitHub's scheduler is busiest exactly on the hour.
+    - cron: "10 * * * *"
+  workflow_dispatch: # lets you trigger a run by hand from the Actions tab
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger daily send
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://moadvice.com/api/cron/daily)
+
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n1)
+
+          echo "HTTP $status"
+          echo "$body"
+
+          # Fail loudly so a broken secret or a 500 shows up in the Actions tab
+          # rather than silently skipping people's messages.
+          if [ "$status" != "200" ]; then
+            echo "::error::Cron endpoint returned $status"
+            exit 1
+          fi
