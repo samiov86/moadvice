@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { TrackPurchase } from "@/components/track-purchase";
 import { prisma } from "@/lib/prisma";
 import { PLANS } from "@/lib/site";
 import { formatMoney } from "@/lib/utils";
@@ -44,6 +45,14 @@ export default async function SendSuccessPage({
   return (
     <>
       <SiteHeader />
+
+      {order && (
+        <TrackPurchase
+          orderId={order.id}
+          plan={order.plan}
+          theme={order.theme}
+        />
+      )}
 
       <main className="flex-1 bg-warm-wash">
         <div className="mx-auto w-full max-w-2xl px-5 py-16 sm:px-8 lg:py-24">

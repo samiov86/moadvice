@@ -16,7 +16,7 @@ export const siteConfig = {
    * "Last updated" line those pages display and the sitemap's `lastmod`, so
    * the two can't disagree. Bump it whenever you edit Terms or Privacy.
    */
-  legalUpdatedAt: "2026-07-29",
+  legalUpdatedAt: "2026-07-31",
   /** Absolute origin, used for links inside emails and Stripe redirect URLs. */
   url:
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??

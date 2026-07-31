@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { track } from "@vercel/analytics";
 import { ArrowLeft, ArrowRight, Check, Loader2, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,21 @@ export function SendForm({
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((previous) => ({ ...previous, [key]: value }));
 
+  /**
+   * Funnel: one event the first time each step is seen. Comparing the counts
+   * shows where people give up — which is the whole reason for measuring, given
+   * most checkouts so far were abandoned and nobody could say at which step.
+   *
+   * Counted once per step per session, so React's double-invoked effects in
+   * development don't inflate the numbers.
+   */
+  const trackedSteps = React.useRef(new Set<number>());
+  React.useEffect(() => {
+    if (trackedSteps.current.has(step)) return;
+    trackedSteps.current.add(step);
+    track("send_step_viewed", { step: STEPS[step], position: step + 1 });
+  }, [step]);
+
   // Changing step swaps the panel in place, which on a short viewport leaves
   // the reader looking at the bottom of the new step. Bring the heading back.
   // Compared against the previous value rather than a mount flag so React's
@@ -103,6 +119,10 @@ export function SendForm({
     setSubmitting(true);
     setError(null);
 
+    // Plan and theme only. Never the email addresses — the recipient's in
+    // particular belongs to someone who never agreed to anything.
+    track("checkout_started", { plan: form.plan, theme: form.theme });
+
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -119,6 +139,7 @@ export function SendForm({
       const data = (await response.json()) as { url?: string; error?: string };
 
       if (!response.ok || !data.url) {
+        track("checkout_failed", { status: response.status });
         setError(data.error ?? "Something went wrong. Please try again.");
         setSubmitting(false);
         return;
@@ -126,6 +147,7 @@ export function SendForm({
 
       window.location.assign(data.url);
     } catch {
+      track("checkout_failed", { status: 0 });
       setError("We couldn't reach the payment page. Check your connection.");
       setSubmitting(false);
     }

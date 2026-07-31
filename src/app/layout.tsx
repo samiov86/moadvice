@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
@@ -57,6 +58,13 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
         {children}
+        {/*
+          Vercel Web Analytics: cookieless, no cross-site tracking, and no
+          personal data leaves the page. Custom events elsewhere deliberately
+          carry only plan/theme/step — never an email address, since half the
+          addresses here belong to people who never agreed to anything.
+        */}
+        <Analytics />
       </body>
     </html>
   );

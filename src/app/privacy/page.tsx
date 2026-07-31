@@ -45,6 +45,11 @@ export default function PrivacyPage() {
           That's it. No tracking pixels in the messages, no open or click
           tracking, no profile building, no ad networks.
         </p>
+        <p>
+          We do record that a message was accepted, delivered, or bounced —
+          reported to us by our email provider, not by anything embedded in the
+          message you opened.
+        </p>
       </section>
 
       <section>
@@ -84,7 +89,8 @@ export default function PrivacyPage() {
             <strong>Resend</strong> — email delivery.
           </li>
           <li>
-            <strong>Vercel</strong> — hosting and scheduled jobs.
+            <strong>Vercel</strong> — hosting, scheduled jobs, and cookieless
+            web analytics.
           </li>
           <li>
             <strong>Our database host</strong> — Postgres, storing everything
@@ -133,11 +139,24 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2>Cookies</h2>
+        <h2>Cookies and analytics</h2>
         <p>
           One cookie, used to keep you signed in to the sender dashboard. It's
-          set only after you use a sign-in link, and it expires. No analytics
-          cookies, no third-party trackers, nothing to consent to.
+          set only after you use a sign-in link, and it expires. There are no
+          advertising cookies and nothing that follows you to other sites, so
+          there's no consent banner to click through.
+        </p>
+        <p>
+          We use <strong>Vercel Web Analytics</strong> to count page views and a
+          few steps in the send form — which step people reach, whether checkout
+          was started, whether it completed. It is cookieless, stores nothing on
+          your device, and does not build a profile or track you across sites.
+        </p>
+        <p>
+          Those events record only what was chosen: the plan, the tone, and which
+          step of the form. <strong>No email address is ever included</strong> —
+          not yours and certainly not the recipient's, who never agreed to
+          anything.
         </p>
       </section>
 
