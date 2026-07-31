@@ -17,6 +17,29 @@ export default function TermsPage() {
       intro={`These terms cover your use of ${siteConfig.name} (${siteConfig.domain}). They're written to be read, not to be impressive. If anything here is unclear, email ${siteConfig.supportEmail} and we'll explain it.`}
     >
       <section>
+        <h2>Who you are contracting with</h2>
+        <p>
+          {siteConfig.name} is a trading name of{" "}
+          <strong>{siteConfig.legal.name}</strong>, an individual trader based
+          at:
+        </p>
+        <p>
+          {siteConfig.legal.addressLines.map((line) => (
+            <span key={line}>
+              {line}
+              <br />
+            </span>
+          ))}
+        </p>
+        <p>
+          Contact:{" "}
+          <a href={`mailto:${siteConfig.supportEmail}`}>
+            {siteConfig.supportEmail}
+          </a>
+        </p>
+      </section>
+
+      <section>
         <h2>1. What the service does</h2>
         <p>
           {siteConfig.name} sends anonymous, pre-written messages of
@@ -211,11 +234,16 @@ export default function TermsPage() {
             {siteConfig.supportEmail}
           </a>
         </p>
+      </section>
+
+      <section>
+        <h2>13. Governing law</h2>
         <p>
-          <strong>Note for whoever operates this site:</strong> this document is
-          a solid starting point, not legal advice. Add your registered company
-          name, address, and governing law, and have a lawyer in your
-          jurisdiction review it before launch.
+          These terms are governed by {siteConfig.legal.governingLaw}. If you
+          are a consumer, this does not deprive you of the protection of any
+          mandatory consumer rules of the country where you live — you keep
+          those rights, and you may bring proceedings in your own country&apos;s
+          courts.
         </p>
       </section>
     </LegalShell>

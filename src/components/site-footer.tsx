@@ -64,10 +64,23 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            © {new Date().getFullYear()} {siteConfig.name}. {siteConfig.domain}
-          </p>
+        <div className="mt-12 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <p>
+              © {new Date().getFullYear()} {siteConfig.name}.{" "}
+              {siteConfig.domain}
+            </p>
+            {/*
+              Trader identity. Spain's LSSI-CE requires it to be permanently and
+              directly accessible, and EU distance-selling rules require it
+              before a contract is concluded — the footer is on every page, so
+              it satisfies both without a separate notice page.
+            */}
+            <p>
+              {siteConfig.name} is a trading name of {siteConfig.legal.name},{" "}
+              {siteConfig.legal.addressInline}.
+            </p>
+          </div>
           <p>
             Questions?{" "}
             <a

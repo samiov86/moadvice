@@ -27,6 +27,26 @@ export default function ContactPage() {
       </section>
 
       <section>
+        <h2>Postal address</h2>
+        <p>
+          {siteConfig.name} is a trading name of{" "}
+          <strong>{siteConfig.legal.name}</strong>.
+        </p>
+        <p>
+          {siteConfig.legal.addressLines.map((line) => (
+            <span key={line}>
+              {line}
+              <br />
+            </span>
+          ))}
+        </p>
+        <p>
+          Email reaches us far faster, but this is the registered trading
+          address if you need to write.
+        </p>
+      </section>
+
+      <section>
         <h2>Common things</h2>
 
         <h3>I want to stop receiving messages</h3>

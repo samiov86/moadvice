@@ -11,12 +11,31 @@ export const siteConfig = {
   description:
     "Mo Advice sends anonymous compliments by email — short, genuine words that boost someone's confidence and morale. No account needed for the person receiving them.",
   supportEmail: "hello@moadvice.com",
+
+  /**
+   * The trader behind the site. "Mo Advice" is a trading name, not a legal
+   * entity, so this is who the customer actually contracts with — required on
+   * the site by EU distance-selling rules and Spain's LSSI-CE, and the first
+   * thing a card issuer looks for in a chargeback.
+   */
+  legal: {
+    name: "Sami Oueslati",
+    addressLines: [
+      "c/ Madrazo 46, 6º 2ª",
+      "08006 Barcelona",
+      "Spain",
+    ],
+    /** Single line, for the footer and email footers. */
+    addressInline: "c/ Madrazo 46, 6º 2ª, 08006 Barcelona, Spain",
+    country: "Spain",
+    governingLaw: "Spanish law",
+  },
   /**
    * When the legal pages last changed, ISO date. Single source for both the
    * "Last updated" line those pages display and the sitemap's `lastmod`, so
    * the two can't disagree. Bump it whenever you edit Terms or Privacy.
    */
-  legalUpdatedAt: "2026-07-31",
+  legalUpdatedAt: "2026-08-01",
   /** Absolute origin, used for links inside emails and Stripe redirect URLs. */
   url:
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??

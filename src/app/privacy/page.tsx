@@ -176,10 +176,18 @@ export default function PrivacyPage() {
           </a>
         </p>
         <p>
-          <strong>Note for whoever operates this site:</strong> add your legal
-          entity, registered address, and — if you have EU or UK users — your
-          data controller details and lawful basis for processing. Have this
-          reviewed before launch.
+          The data controller is <strong>{siteConfig.legal.name}</strong>,{" "}
+          {siteConfig.legal.addressInline}. We process sender data to perform
+          the contract you entered into, and recipient data on the basis of our
+          legitimate interest in delivering the message a sender paid for —
+          balanced against the recipient&apos;s interests by the one-click
+          opt-out in every message and the permanent suppression that follows.
+        </p>
+        <p>
+          If you are in the EU or UK and think we have handled your data badly,
+          tell us first — but you also have the right to complain to your
+          national data protection authority. In Spain that is the{" "}
+          <a href="https://www.aepd.es">AEPD</a>.
         </p>
       </section>
     </LegalShell>
