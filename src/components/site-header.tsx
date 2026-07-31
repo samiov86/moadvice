@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
  */
 const NAV_LINKS: NavLink[] = [
   { href: "/#how", label: "How it works" },
+  { href: "/messages", label: "Messages" },
   { href: "/#pricing", label: "Pricing" },
   { href: "/dashboard", label: "Dashboard" },
 ];

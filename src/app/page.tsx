@@ -422,7 +422,14 @@ export default function HomePage() {
 
             <p className="mt-8 text-sm text-muted-foreground">
               A daily plan works through the bank without repeating, so nobody
-              receives the same message twice until they&apos;ve seen them all.
+              receives the same message twice until they&apos;ve seen them all.{" "}
+              <Link
+                href="/messages"
+                className="underline underline-offset-4 hover:text-foreground"
+              >
+                Read all {MESSAGE_BANK.length} of them
+              </Link>
+              .
             </p>
           </div>
         </section>
