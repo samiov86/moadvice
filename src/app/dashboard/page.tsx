@@ -47,7 +47,9 @@ export default async function DashboardPage() {
 
   const active = subscriptions.filter((s) => s.status !== "CANCELED");
   const ended = subscriptions.filter((s) => s.status === "CANCELED");
-  const totalDelivered =
+  // Deliberately "sent": these count messages handed to Resend. Whether a
+  // mailbox accepted one is per-message, and shown by DeliveryBadge.
+  const totalSent =
     subscriptions.reduce((sum, s) => sum + s.sentCount, 0) + oneOffs.length;
 
   return (
@@ -65,9 +67,9 @@ export default async function DashboardPage() {
               <p className="mt-3 text-muted-foreground">
                 Signed in as {session.user.email} ·{" "}
                 <strong className="font-medium text-foreground">
-                  {totalDelivered}
+                  {totalSent}
                 </strong>{" "}
-                {totalDelivered === 1 ? "message" : "messages"} delivered
+                {totalSent === 1 ? "message" : "messages"} sent
               </p>
             </div>
 
@@ -134,7 +136,10 @@ export default async function DashboardPage() {
 
                         <dl className="mt-6 grid gap-4 border-t border-border pt-5 text-sm sm:grid-cols-3">
                           <Stat
-                            label="Delivered"
+                            // "Sent", not "Delivered": sentCount counts what
+                            // Resend accepted. Only the per-message badge below
+                            // can say a mailbox actually took it.
+                            label="Sent"
                             value={`${subscription.sentCount} ${
                               subscription.sentCount === 1
                                 ? "message"

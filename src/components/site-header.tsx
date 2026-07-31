@@ -7,12 +7,19 @@ import { MobileNav, type NavLink } from "@/components/mobile-nav";
 import { siteConfig } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-/** Single source for the header links, shared by both breakpoints. */
+/**
+ * Single source for the header links, shared by both breakpoints.
+ *
+ * No separate "Sign in" entry: the header is a static component rendered on
+ * cached pages, so it can't know whether you're signed in — and showing "Sign
+ * in" to someone who already is looked broken on the dashboard. "Dashboard" is
+ * the one door instead; it redirects to /signin when there's no session, which
+ * is the same journey with one less wrong-looking link.
+ */
 const NAV_LINKS: NavLink[] = [
   { href: "/#how", label: "How it works" },
   { href: "/#pricing", label: "Pricing" },
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/signin", label: "Sign in" },
 ];
 
 export function Logo({ className }: { className?: string }) {
@@ -49,7 +56,7 @@ export function SiteHeader() {
         <Logo />
 
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          {NAV_LINKS.filter((link) => link.href !== "/signin").map((link) => (
+          {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -61,14 +68,6 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="hidden md:inline-flex"
-          >
-            <Link href="/signin">Sign in</Link>
-          </Button>
           <Button asChild size="sm">
             <Link href="/send">Send kind words</Link>
           </Button>
