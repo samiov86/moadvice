@@ -34,12 +34,24 @@ export default async function DashboardPage() {
   const [subscriptions, oneOffs] = await Promise.all([
     prisma.subscription.findMany({
       where: { userId: session.user.id },
-      include: { recipient: true },
+      include: {
+        recipient: true,
+        // The words themselves — the thing a subscriber most wants to see, and
+        // until now the one thing the dashboard never showed.
+        messagesSent: {
+          include: { template: true },
+          orderBy: { sentAt: "desc" },
+          take: 5,
+        },
+      },
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     }),
     prisma.order.findMany({
       where: { userId: session.user.id, plan: "ONE_OFF", status: "PAID" },
-      include: { recipient: true, messagesSent: true },
+      include: {
+        recipient: true,
+        messagesSent: { include: { template: true } },
+      },
       orderBy: { createdAt: "desc" },
       take: 25,
     }),
@@ -170,6 +182,10 @@ export default async function DashboardPage() {
                           </p>
                         )}
 
+                        {subscription.messagesSent.length > 0 && (
+                          <SentMessages messages={subscription.messagesSent} />
+                        )}
+
                         <div className="mt-6">
                           <SubscriptionControls
                             subscriptionId={subscription.id}
@@ -200,27 +216,39 @@ export default async function DashboardPage() {
                   {oneOffs.map((order) => {
                     const delivery = order.messagesSent[0];
                     return (
-                      <li
-                        key={order.id}
-                        className="flex flex-wrap items-center justify-between gap-4 p-5 sm:px-7"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate font-medium">
-                            {order.recipient.name?.trim() ||
-                              order.recipient.email}
-                          </p>
-                          <p className="mt-0.5 truncate text-sm text-muted-foreground">
-                            {order.recipient.email} ·{" "}
-                            {order.theme === "PERSONAL"
-                              ? "Personal"
-                              : "Professional"}
-                          </p>
+                      <li key={order.id} className="p-5 sm:px-7">
+                        <div className="flex flex-wrap items-center justify-between gap-4">
+                          <div className="min-w-0">
+                            <p className="truncate font-medium">
+                              {order.recipient.name?.trim() ||
+                                order.recipient.email}
+                            </p>
+                            <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                              {order.recipient.email} ·{" "}
+                              {order.theme === "PERSONAL"
+                                ? "Personal"
+                                : "Professional"}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <span>
+                              {formatDate(order.paidAt ?? order.createdAt)}
+                            </span>
+                            <DeliveryBadge status={delivery?.status} />
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <span>{formatDate(order.paidAt ?? order.createdAt)}</span>
-                          <DeliveryBadge status={delivery?.status} />
-                        </div>
+                        {delivery?.template && (
+                          <details className="mt-3 rounded-xl border border-border bg-secondary/30 px-4 py-3">
+                            <summary className="cursor-pointer list-none font-display text-[15px] leading-snug">
+                              {delivery.template.headline}
+                            </summary>
+                            <p className="mt-3 font-display text-[15px] leading-[1.7] text-muted-foreground">
+                              {delivery.template.body}
+                            </p>
+                          </details>
+                        )}
                       </li>
                     );
                   })}
@@ -280,6 +308,53 @@ export default async function DashboardPage() {
 
       <SiteFooter />
     </>
+  );
+}
+
+/**
+ * The messages that actually went out, newest first.
+ *
+ * Uses a native <details> so the full text is one click away without shipping
+ * any JavaScript — the whole dashboard is a server component and there's no
+ * reason for this to change that.
+ */
+function SentMessages({
+  messages,
+}: {
+  messages: Array<{
+    id: string;
+    sentAt: Date;
+    status: DeliveryStatus;
+    template: { headline: string; body: string };
+  }>;
+}) {
+  return (
+    <div className="mt-6 border-t border-border pt-5">
+      <h4 className="text-xs uppercase tracking-widest text-muted-foreground">
+        {messages.length === 1 ? "Message sent" : "Recent messages"}
+      </h4>
+
+      <ul className="mt-3 space-y-2">
+        {messages.map((message) => (
+          <li key={message.id}>
+            <details className="group rounded-xl border border-border bg-secondary/30 px-4 py-3">
+              <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3">
+                <span className="font-display text-[15px] leading-snug">
+                  {message.template.headline}
+                </span>
+                <span className="flex shrink-0 items-center gap-2.5 text-xs text-muted-foreground">
+                  {formatDate(message.sentAt)}
+                  <DeliveryBadge status={message.status} />
+                </span>
+              </summary>
+              <p className="mt-3 font-display text-[15px] leading-[1.7] text-muted-foreground">
+                {message.template.body}
+              </p>
+            </details>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

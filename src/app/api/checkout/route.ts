@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { stripe, ensureStripeCustomer } from "@/lib/stripe";
 import { PLANS, absoluteUrl } from "@/lib/site";
 import { normalizeEmail } from "@/lib/utils";
+import { clientIpFrom, ipRateLimit, senderRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -26,6 +27,16 @@ const checkoutSchema = z.object({
  * All this does is create the PENDING order the webhook will look for.
  */
 export async function POST(request: Request) {
+  // Cheap check first: refuse a flood before touching the database or Stripe.
+  const ip = clientIpFrom(request.headers);
+  const ipCheck = ipRateLimit(ip);
+  if (!ipCheck.ok) {
+    return NextResponse.json(
+      { error: "That's a lot of requests. Give it a minute and try again." },
+      { status: 429, headers: { "Retry-After": String(ipCheck.retryAfter) } },
+    );
+  }
+
   let payload: unknown;
   try {
     payload = await request.json();
@@ -84,6 +95,17 @@ export async function POST(request: Request) {
         create: { email: senderEmail },
         update: {},
       }));
+
+    // Survives across instances, unlike the IP window above.
+    if (!(await senderRateLimit(sender.id))) {
+      return NextResponse.json(
+        {
+          error:
+            "You've started a lot of checkouts in the last few minutes. Finish or abandon one, then try again.",
+        },
+        { status: 429, headers: { "Retry-After": "600" } },
+      );
+    }
 
     const stripeCustomerId = await ensureStripeCustomer({
       email: sender.email,
