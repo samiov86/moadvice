@@ -20,6 +20,19 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "A message from Mo Advice";
 
+/**
+ * Prerender all 64 at build time.
+ *
+ * Without this the route is generated on demand, and the font files are read
+ * from `process.cwd()` at request time — a path Next's file tracing can't
+ * follow, so the .ttf files never ship in the serverless bundle and every
+ * request 500s. It worked locally only because `next start` has the whole repo
+ * on disk. Building them means the reads happen where the files certainly are.
+ */
+export function generateStaticParams() {
+  return MESSAGE_BANK.map((message) => ({ slug: message.slug }));
+}
+
 const CREAM = "#FDF8F3";
 const SAND = "#F5ECE1";
 const PEACH = "#FBE3D6";
