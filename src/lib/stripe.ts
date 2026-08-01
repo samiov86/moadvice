@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { env } from "@/lib/env";
+import { env, isStripeTestMode } from "@/lib/env";
 
 /**
  * Stripe client. The API version is deliberately not pinned here — the account
@@ -15,6 +15,17 @@ import { env } from "@/lib/env";
 const globalForStripe = globalThis as unknown as { stripe: Stripe | undefined };
 
 function createClient(): Stripe {
+  // Loud, once, on the first Stripe call outside production. A local test that
+  // opens a real Checkout session is one keystroke away from taking real money,
+  // and the only tell is a `cs_live_` buried in a JSON response.
+  if (process.env.NODE_ENV !== "production" && !isStripeTestMode()) {
+    console.warn(
+      "\n\x1b[31m\x1b[1m  STRIPE IS IN LIVE MODE AND THIS IS NOT PRODUCTION\x1b[0m\n" +
+        "  Anything you do here can charge real cards. Use sk_test_… locally.\n" +
+        "  Run `npm run env:check` to see what else is pointed at production.\n",
+    );
+  }
+
   const client =
     globalForStripe.stripe ??
     new Stripe(env.STRIPE_SECRET_KEY, {

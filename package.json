@@ -2,7 +2,7 @@
   "name": "moadvice",
   "version": "0.1.0",
   "private": true,
-  "description": "Mo Advice — anonymous compliments that feel like good advice.",
+  "description": "Mo Advice \u2014 anonymous compliments that feel like good advice.",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -16,7 +16,8 @@
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
     "emails:preview": "tsx scripts/preview-emails.ts",
-    "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook"
+    "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook",
+    "env:check": "tsx --env-file=.env scripts/check-env.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

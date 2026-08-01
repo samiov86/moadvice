@@ -169,6 +169,66 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://moadvice.com/api/cron/daily
 
 ---
 
+## Local development
+
+**Check what you're pointed at before you run anything:**
+
+```bash
+npm run env:check
+```
+
+It prints your database host, Stripe mode, and app URL, and warns when local
+development is aimed at production. Worth running after any `.env` edit.
+
+By default a fresh clone points everywhere at once — the same `.env` drives
+local and production — which means a local experiment can write real rows and
+open real Stripe Checkout sessions. That has happened on this project more than
+once. Two changes fix it permanently.
+
+### A separate database
+
+Neon supports branches, which are copy-on-write clones of production: instant,
+free on the starter plan, and disposable.
+
+1. Neon dashboard → your project → **Branches** → **New branch** from `main`
+2. Copy its connection string into your local `.env` as `DATABASE_URL`
+   (and `DIRECT_URL`)
+3. `npm run db:deploy && npm run db:seed`
+
+Break it however you like, then delete the branch and make another. Production
+never notices.
+
+### Stripe test keys
+
+1. Stripe dashboard → toggle **Test mode** (top right)
+2. Developers → API keys → copy the `sk_test_…` secret key
+3. Recreate the two prices in test mode and copy those `price_…` IDs — live and
+   test objects are completely separate
+4. `npm run stripe:listen` for a test-mode `whsec_…`
+
+Local `.env` should therefore hold **only** test credentials:
+
+```
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_PRICE_ONE_OFF="price_...(test)"
+STRIPE_PRICE_DAILY="price_...(test)"
+STRIPE_WEBHOOK_SECRET="whsec_...(from stripe listen)"
+DATABASE_URL="postgresql://...(neon branch)"
+NEXT_PUBLIC_GA_MEASUREMENT_ID=""   # leave empty: no dev traffic in the live property
+```
+
+Live keys belong in Vercel's environment variables and nowhere else. The Stripe
+client prints a red warning on first use if it finds a live key outside
+production, so the mistake announces itself.
+
+### Email in development
+
+Resend sends real email from a real domain, so local testing reaches real
+inboxes. Send to your own address, or create a second Resend API key restricted
+to a test domain.
+
+---
+
 ## Environment
 
 Every variable is documented in [`.env.example`](.env.example). Validation is lazy and
