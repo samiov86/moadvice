@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Logo } from "@/components/site-header";
+import { ConsentReopenButton } from "@/components/analytics/consent-banner";
 import { siteConfig } from "@/lib/site";
 
 const columns = [
@@ -83,7 +84,7 @@ export function SiteFooter() {
             </p>
           </div>
           <p>
-            Questions?{" "}
+            <ConsentReopenButton /> · Questions?{" "}
             <a
               href={`mailto:${siteConfig.supportEmail}`}
               className="underline underline-offset-4 hover:text-foreground"

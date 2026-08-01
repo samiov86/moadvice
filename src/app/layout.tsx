@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { ConsentBanner } from "@/components/analytics/consent-banner";
+
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -48,6 +51,9 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+/** Unset locally, so development never reports into the live property. */
+const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -63,8 +69,19 @@ export default function RootLayout({
           personal data leaves the page. Custom events elsewhere deliberately
           carry only plan/theme/step — never an email address, since half the
           addresses here belong to people who never agreed to anything.
+
+          It runs for everyone, including people who decline below: no cookies
+          means no consent required, so declining costs us depth rather than
+          all measurement.
         */}
         <Analytics />
+
+        {gaMeasurementId && (
+          <>
+            <GoogleAnalytics measurementId={gaMeasurementId} />
+            <ConsentBanner />
+          </>
+        )}
       </body>
     </html>
   );
