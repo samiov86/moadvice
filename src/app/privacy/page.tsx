@@ -179,12 +179,13 @@ export default function PrivacyPage() {
           </a>
         </p>
         <p>
-          The data controller is {siteConfig.legal.name},{" "}
-          {siteConfig.legal.addressInline}. We process sender data to perform
-          the contract you entered into, and recipient data on the basis of our
-          legitimate interest in delivering the message a sender paid for —
-          balanced against the recipient&apos;s interests by the one-click
-          opt-out in every message and the permanent suppression that follows.
+          The data controller is {siteConfig.legal.name} (NIF{" "}
+          {siteConfig.legal.nif}), {siteConfig.legal.addressInline}. We process
+          sender data to perform the contract you entered into, and recipient
+          data on the basis of our legitimate interest in delivering the message
+          a sender paid for — balanced against the recipient&apos;s interests by
+          the one-click opt-out in every message and the permanent suppression
+          that follows.
         </p>
         <p>
           If you are in the EU or UK and think we have handled your data badly,

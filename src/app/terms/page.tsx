@@ -30,6 +30,7 @@ export default function TermsPage() {
             </span>
           ))}
         </p>
+        <p>NIF: {siteConfig.legal.nif}</p>
         <p>
           Contact:{" "}
           <a href={`mailto:${siteConfig.supportEmail}`}>

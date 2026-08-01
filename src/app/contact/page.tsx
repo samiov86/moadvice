@@ -29,7 +29,8 @@ export default function ContactPage() {
       <section>
         <h2>Postal address</h2>
         <p>
-          {siteConfig.name} is a trading name of {siteConfig.legal.name}.
+          {siteConfig.name} is a trading name of {siteConfig.legal.name}, NIF{" "}
+          {siteConfig.legal.nif}.
         </p>
         <p>
           {siteConfig.legal.addressLines.map((line) => (

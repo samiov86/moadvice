@@ -78,8 +78,8 @@ export function SiteFooter() {
               it satisfies both without a separate notice page.
             */}
             <p>
-              {siteConfig.name} is a trading name of {siteConfig.legal.name},{" "}
-              {siteConfig.legal.addressInline}.
+              {siteConfig.name} is a trading name of {siteConfig.legal.name},
+              NIF {siteConfig.legal.nif}, {siteConfig.legal.addressInline}.
             </p>
           </div>
           <p>

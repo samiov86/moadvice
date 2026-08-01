@@ -20,6 +20,8 @@ export const siteConfig = {
    */
   legal: {
     name: "Sami Oueslati",
+    /** Spanish tax ID. LSSI-CE requires a provider to display it. */
+    nif: "41571545B",
     addressLines: ["c/ Madrazo 46", "08006 Barcelona", "Spain"],
     /** Single line, for the footer and email footers. */
     addressInline: "c/ Madrazo 46, 08006 Barcelona, Spain",
