@@ -20,13 +20,9 @@ export const siteConfig = {
    */
   legal: {
     name: "Sami Oueslati",
-    addressLines: [
-      "c/ Madrazo 46, 6º 2ª",
-      "08006 Barcelona",
-      "Spain",
-    ],
+    addressLines: ["c/ Madrazo 46", "08006 Barcelona", "Spain"],
     /** Single line, for the footer and email footers. */
-    addressInline: "c/ Madrazo 46, 6º 2ª, 08006 Barcelona, Spain",
+    addressInline: "c/ Madrazo 46, 08006 Barcelona, Spain",
     country: "Spain",
     governingLaw: "Spanish law",
   },
