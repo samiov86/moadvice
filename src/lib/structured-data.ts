@@ -91,6 +91,30 @@ export function serviceSchema() {
   };
 }
 
+/**
+ * Breadcrumbs. Google renders these in place of the raw URL in results, which
+ * makes a deep page look like part of a structured site rather than a stray
+ * hit — and it's one of the few enhancements available to a site with no
+ * reviews, no products and no events.
+ *
+ * Pass the trail without the current page's own link: the last item is the
+ * page you're on, and schema.org expects it to have no `item`.
+ */
+export function breadcrumbSchema(
+  trail: Array<{ name: string; path?: string }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: trail.map((entry, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: entry.name,
+      ...(entry.path ? { item: absoluteUrl(entry.path) } : {}),
+    })),
+  };
+}
+
 export function faqSchema(faqs: Array<{ q: string; a: string }>) {
   return {
     "@context": "https://schema.org",

@@ -8,7 +8,8 @@ import { MessageCard } from "@/components/message-card";
 import { Button } from "@/components/ui/button";
 import { MESSAGE_BANK } from "@/data/message-bank";
 import { CATEGORY_PAGES } from "@/lib/message-categories";
-import { siteConfig } from "@/lib/site";
+import { absoluteUrl, siteConfig } from "@/lib/site";
+import { breadcrumbSchema, jsonLd } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
   title: `Every message we send`,
@@ -23,8 +24,34 @@ export default function MessagesIndexPage() {
     sample: page.messages.slice(0, 3),
   }));
 
+  const schemas = [
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "@id": absoluteUrl("/messages#collection"),
+      name: "Every message we send",
+      description: metadata.description,
+      url: absoluteUrl("/messages"),
+      isPartOf: { "@id": absoluteUrl("/#website") },
+      hasPart: CATEGORY_PAGES.map((page) => ({
+        "@type": "CollectionPage",
+        name: page.title,
+        url: absoluteUrl(`/messages/${page.slug}`),
+      })),
+    },
+    breadcrumbSchema([{ name: "Home", path: "/" }, { name: "Messages" }]),
+  ];
+
   return (
     <>
+      {schemas.map((schema, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd(schema) }}
+        />
+      ))}
+
       <SiteHeader />
 
       <main className="flex-1">

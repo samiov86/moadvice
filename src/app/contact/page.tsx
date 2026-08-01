@@ -6,7 +6,7 @@ import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: `Get in touch with ${siteConfig.name}.`,
+  description: `Contact ${siteConfig.name} — stop receiving messages, cancel a daily plan, query a charge, or report misuse. One inbox, read by a person, usually answered within a day.`,
   alternates: { canonical: "/contact" },
 };
 

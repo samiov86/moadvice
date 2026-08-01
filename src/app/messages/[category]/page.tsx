@@ -9,7 +9,7 @@ import { MessageCard } from "@/components/message-card";
 import { Button } from "@/components/ui/button";
 import { CATEGORY_PAGES, getCategoryPage } from "@/lib/message-categories";
 import { absoluteUrl, siteConfig } from "@/lib/site";
-import { jsonLd } from "@/lib/structured-data";
+import { breadcrumbSchema, jsonLd } from "@/lib/structured-data";
 
 interface CategoryPageProps {
   params: Promise<{ category: string }>;
@@ -28,7 +28,9 @@ export async function generateMetadata({
   if (!page) return {};
 
   return {
-    title: page.title,
+    // Absolute, so the "· Mo Advice" suffix doesn't push these past the ~60
+    // characters Google shows. The phrasing is the part worth keeping whole.
+    title: { absolute: page.title },
     description: page.metaDescription,
     alternates: { canonical: `/messages/${page.slug}` },
     openGraph: {
@@ -73,12 +75,21 @@ export default async function MessageCategoryPage({
     },
   };
 
+  const breadcrumbs = breadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Messages", path: "/messages" },
+    { name: page.name },
+  ]);
+
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(schema) }}
-      />
+      {[schema, breadcrumbs].map((entry, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd(entry) }}
+        />
+      ))}
 
       <SiteHeader />
 

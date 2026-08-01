@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: `How ${siteConfig.name} handles your data and the data of people you send to.`,
+  description: `What ${siteConfig.name} stores about senders and recipients, why recipients get the stricter treatment, who processes data for us, and how to have yours deleted.`,
   alternates: { canonical: "/privacy" },
 };
 
