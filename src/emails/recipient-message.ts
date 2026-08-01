@@ -59,7 +59,11 @@ export function recipientMessageEmail({
       spacer(32),
     ].join(""),
     footerHtml: [
-      `${escapeHtml(siteConfig.name)} delivers anonymous compliments by email. You don't have an account and we never sell or share your address.`,
+      `${escapeHtml(siteConfig.name)} delivers anonymous compliments by email. You don't have an account and we never sell or share your address. <a href="${absoluteUrl("/received")}" style="color:#94897C;">What is this?</a>`,
+      // One line, once, at the very bottom. Someone who has just been moved by
+      // a message is the likeliest person to send one — but they never asked to
+      // be here, so it stays an aside rather than a pitch.
+      `If it made you think of someone, you can <a href="${absoluteUrl("/send")}" style="color:#94897C;">send one too</a>.`,
       `<a href="${unsubscribeUrl}" style="color:#94897C;">Stop receiving these</a> &nbsp;·&nbsp; <a href="${absoluteUrl("/privacy")}" style="color:#94897C;">Privacy</a>`,
     ].join("<br /><br />"),
   });
@@ -72,6 +76,8 @@ export function recipientMessageEmail({
     `Sent anonymously. Someone who knows you chose these words for you${
       isDaily ? ", and picked out a new one for every morning this month" : ""
     }.`,
+    `What is this? ${absoluteUrl("/received")}`,
+    `If it made you think of someone, you can send one too: ${absoluteUrl("/send")}`,
     `Stop receiving these: ${unsubscribeUrl}`,
   ]);
 

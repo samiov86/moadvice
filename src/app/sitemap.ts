@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { absoluteUrl, siteConfig } from "@/lib/site";
 import { CATEGORY_PAGES } from "@/lib/message-categories";
+import { OCCASIONS } from "@/lib/occasions";
 
 /**
  * `lastmod` is omitted where we don't genuinely track a change date.
@@ -25,6 +26,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
       changeFrequency: "monthly" as const,
     })),
+    // Occasion guides. /m/[slug] is deliberately absent: those are noindex,
+    // existing to be shared rather than found.
+    ...OCCASIONS.map((occasion) => ({
+      url: absoluteUrl(`/for/${occasion.slug}`),
+      priority: 0.7,
+      changeFrequency: "yearly" as const,
+    })),
+    { url: absoluteUrl("/received"), priority: 0.5, changeFrequency: "yearly" },
     {
       url: absoluteUrl("/terms"),
       lastModified: legalUpdated,

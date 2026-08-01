@@ -8,6 +8,7 @@ import { MessageCard } from "@/components/message-card";
 import { Button } from "@/components/ui/button";
 import { MESSAGE_BANK } from "@/data/message-bank";
 import { CATEGORY_PAGES } from "@/lib/message-categories";
+import { OCCASIONS } from "@/lib/occasions";
 import { absoluteUrl, siteConfig } from "@/lib/site";
 import { breadcrumbSchema, jsonLd } from "@/lib/structured-data";
 
@@ -107,6 +108,32 @@ export default function MessagesIndexPage() {
               </div>
             </section>
           ))}
+
+          <section className="mb-16 border-t border-border pt-12">
+            <h2 className="font-display text-2xl leading-tight">
+              For a particular occasion
+            </h2>
+            <p className="mt-2 max-w-2xl text-muted-foreground">
+              What to say, and why the usual thing falls flat.
+            </p>
+            <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+              {OCCASIONS.map((occasion) => (
+                <li key={occasion.slug}>
+                  <Link
+                    href={`/for/${occasion.slug}`}
+                    className="block rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
+                  >
+                    <span className="font-display text-lg leading-snug">
+                      {occasion.heading}
+                    </span>
+                    <span className="mt-1 block text-sm text-muted-foreground">
+                      {occasion.when}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
 
           <div className="mt-4 rounded-2xl border border-border bg-secondary/40 p-8 text-center">
             <h2 className="font-display text-2xl leading-snug text-balance">
