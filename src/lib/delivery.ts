@@ -2,7 +2,7 @@ import type { DeliveryStatus, MessageCategory } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/resend";
-import { absoluteUrl } from "@/lib/site";
+import { DEFAULT_LOCALE, absoluteUrl } from "@/lib/site";
 import { pickTemplateForRecipient, subjectForDelivery } from "@/lib/messages";
 import { alertDeliveryFailure } from "@/lib/alerts";
 import { recipientMessageEmail } from "@/emails/recipient-message";
@@ -16,6 +16,8 @@ export interface DeliverMessageParams {
   subscriptionId?: string | null;
   /** Controls one line of copy in the email. */
   isDaily: boolean;
+  /** Which language bank to draw from. */
+  locale?: string;
   /**
    * Stable per-delivery key. Prevents a retried webhook or a cron run that
    * overlaps itself from sending the same message twice.
@@ -43,6 +45,7 @@ export async function deliverMessage({
   orderId = null,
   subscriptionId = null,
   isDaily,
+  locale = DEFAULT_LOCALE,
   idempotencyKey,
 }: DeliverMessageParams): Promise<DeliverMessageResult> {
   const recipient = await prisma.recipient.findUnique({
@@ -59,7 +62,7 @@ export async function deliverMessage({
     const skipped = await prisma.messageSent.create({
       data: {
         recipientId,
-        templateId: await anyTemplateId(theme),
+        templateId: await anyTemplateId(theme, locale),
         orderId,
         subscriptionId,
         theme,
@@ -71,7 +74,7 @@ export async function deliverMessage({
     return { status: "SKIPPED", messageSentId: skipped.id };
   }
 
-  const template = await pickTemplateForRecipient(recipientId, theme);
+  const template = await pickTemplateForRecipient(recipientId, theme, locale);
   if (!template) {
     return {
       status: "FAILED",
@@ -151,14 +154,17 @@ export async function deliverMessage({
  * The SKIPPED log row still needs a templateId (the column is required so the
  * happy path can't lose it). Any template of the right category will do.
  */
-async function anyTemplateId(theme: MessageCategory): Promise<string> {
+async function anyTemplateId(
+  theme: MessageCategory,
+  locale: string,
+): Promise<string> {
   const template = await prisma.messageTemplate.findFirst({
-    where: { category: theme },
+    where: { category: theme, locale },
     select: { id: true },
   });
   if (!template) {
     throw new Error(
-      `Message bank is empty for ${theme}. Run \`npm run db:seed\`.`,
+      `Message bank is empty for ${theme} in ${locale}. Run \`npm run db:seed\`.`,
     );
   }
   return template.id;

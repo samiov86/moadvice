@@ -2,6 +2,7 @@ import type { MessageCategory, MessageTemplate } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { SUBJECT_LINES } from "@/data/message-bank";
+import { DEFAULT_LOCALE } from "@/lib/site";
 
 /**
  * Choose the next message for a recipient.
@@ -16,9 +17,12 @@ import { SUBJECT_LINES } from "@/data/message-bank";
 export async function pickTemplateForRecipient(
   recipientId: string,
   category: MessageCategory,
+  locale: string = DEFAULT_LOCALE,
 ): Promise<MessageTemplate | null> {
   const [candidates, history] = await Promise.all([
-    prisma.messageTemplate.findMany({ where: { category, active: true } }),
+    prisma.messageTemplate.findMany({
+      where: { category, locale, active: true },
+    }),
     prisma.messageSent.findMany({
       where: { recipientId, status: "SENT" },
       select: { templateId: true, sentAt: true },

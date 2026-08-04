@@ -175,6 +175,9 @@ model Order {
   sendHour     Int?
   sendTimezone String?
 
+  /// Language the message is sent in, chosen by the sender at checkout.
+  locale String @default("en")
+
   /// When the buyer consented to immediate performance, and the exact wording
   /// they were shown. Stored rather than merely referenced so a chargeback or
   /// consumer-law complaint can be answered with what was actually agreed.
@@ -205,6 +208,9 @@ model Subscription {
 
   theme  MessageCategory
   status SubscriptionStatus @default(ACTIVE)
+
+  /// Language the daily messages are sent in.
+  locale String @default("en")
 
   stripeSubscriptionId String  @unique
   stripeCustomerId     String
@@ -246,12 +252,21 @@ model Subscription {
 model MessageTemplate {
   id       String          @id @default(cuid())
   category MessageCategory
+
+  /// BCP-47 language tag. Everything is "en" today.
+  ///
+  /// Present now so adding a language later is a seed rather than a migration
+  /// against live subscription data. Note that a second language means writing
+  /// 60-odd new messages, not translating these: the value here is entirely in
+  /// rhythm and register, and machine translation removes both.
+  locale String @default("en")
   /// Short line used as the email subject / headline.
   headline String
   /// The message itself. Two to four sentences, second person.
   body     String
-  /// Stable key so re-seeding updates rather than duplicates.
-  slug     String          @unique
+  /// Stable key so re-seeding updates rather than duplicates. Unique per
+  /// locale, so the same message can exist in several languages.
+  slug     String
   active   Boolean         @default(true)
 
   createdAt DateTime @default(now())
@@ -259,7 +274,8 @@ model MessageTemplate {
 
   messagesSent MessageSent[]
 
-  @@index([category, active])
+  @@unique([slug, locale])
+  @@index([category, locale, active])
 }
 
 /// Delivery log. One row per email sent to a recipient. Also used to avoid

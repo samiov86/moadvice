@@ -14,6 +14,13 @@ import { MESSAGE_BANK } from "../src/data/message-bank";
 
 const prisma = new PrismaClient();
 
+/**
+ * The bank in this file is English. A second language gets its own data file
+ * and its own seed run — the slug+locale key means both can coexist, and the
+ * messages are written fresh rather than translated.
+ */
+const LOCALE = "en";
+
 async function main() {
   const slugs = MESSAGE_BANK.map((m) => m.slug);
 
@@ -24,9 +31,10 @@ async function main() {
 
   for (const message of MESSAGE_BANK) {
     await prisma.messageTemplate.upsert({
-      where: { slug: message.slug },
+      where: { slug_locale: { slug: message.slug, locale: LOCALE } },
       create: {
         slug: message.slug,
+        locale: LOCALE,
         category: message.category,
         headline: message.headline,
         body: message.body,
@@ -42,14 +50,16 @@ async function main() {
   }
 
   const retired = await prisma.messageTemplate.updateMany({
-    where: { slug: { notIn: slugs }, active: true },
+    where: { slug: { notIn: slugs }, locale: LOCALE, active: true },
     data: { active: false },
   });
 
   const [personal, professional] = await Promise.all([
-    prisma.messageTemplate.count({ where: { category: "PERSONAL", active: true } }),
     prisma.messageTemplate.count({
-      where: { category: "PROFESSIONAL", active: true },
+      where: { category: "PERSONAL", locale: LOCALE, active: true },
+    }),
+    prisma.messageTemplate.count({
+      where: { category: "PROFESSIONAL", locale: LOCALE, active: true },
     }),
   ]);
 

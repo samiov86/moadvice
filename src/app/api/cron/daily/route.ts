@@ -43,6 +43,7 @@ export async function GET(request: Request) {
       theme: true,
       sendHour: true,
       sendTimezone: true,
+      locale: true,
       currentPeriodEnd: true,
       cancelAtPeriodEnd: true,
     },
@@ -74,6 +75,7 @@ export async function GET(request: Request) {
       theme: subscription.theme,
       subscriptionId: subscription.id,
       isDaily: true,
+      locale: subscription.locale,
       idempotencyKey: `sub_${subscription.id}_${dayKey}`,
     });
 

@@ -120,6 +120,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       order.id,
       order.recipientId,
       order.theme,
+      order.locale,
     );
 
     // Only claim it's on its way if it actually went. Otherwise give the money
@@ -140,6 +141,7 @@ async function fulfilOneOff(
   orderId: string,
   recipientId: string,
   theme: "PERSONAL" | "PROFESSIONAL",
+  locale: string,
 ): Promise<boolean> {
   const previous = await prisma.messageSent.findFirst({
     where: { orderId },
@@ -154,6 +156,7 @@ async function fulfilOneOff(
     theme,
     orderId,
     isDaily: false,
+    locale,
     idempotencyKey: `order_${orderId}`,
   });
 
@@ -294,6 +297,7 @@ async function fulfilDailyPlan(
       stripePriceId: stripeSubscription.items.data[0]?.price.id ?? null,
       sendHour,
       sendTimezone,
+      locale: order.locale,
       // First message goes out immediately; the cron picks up from tomorrow.
       nextSendAt: nextLocalHour(sendHour, sendTimezone, now),
       currentPeriodEnd: periodEndOf(stripeSubscription),
@@ -314,6 +318,7 @@ async function fulfilDailyPlan(
     theme: order.theme,
     subscriptionId: subscription.id,
     isDaily: true,
+    locale: subscription.locale,
     idempotencyKey: `sub_${subscription.id}_first`,
   });
 

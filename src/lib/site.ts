@@ -55,6 +55,15 @@ export const siteConfig = {
 export const WITHDRAWAL_CONSENT_TEXT =
   "I want my message sent straight away, and I understand that once it has been sent I lose my right to cancel within 14 days.";
 
+/**
+ * Language everything is written and sent in today.
+ *
+ * A second locale means writing a fresh bank of messages in it, not translating
+ * these — the value is in rhythm and register, and machine translation removes
+ * both. The plumbing is ready; the writing is the work.
+ */
+export const DEFAULT_LOCALE = "en";
+
 export type PlanId = "ONE_OFF" | "DAILY";
 
 export interface PlanConfig {
