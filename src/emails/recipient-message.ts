@@ -62,15 +62,15 @@ export function recipientMessageEmail({
       spacer(32),
     ].join(""),
     footerHtml: [
-      `${escapeHtml(siteConfig.name)} ${copy.brandFooter} <a href="${absoluteUrl("/received")}" style="color:#94897C;">${copy.whatIsThis}</a>`,
+      `${escapeHtml(siteConfig.name)} ${copy.brandFooter} <a href="${absoluteUrl(`/${locale}/received`)}" style="color:#94897C;">${copy.whatIsThis}</a>`,
       // One line, once, at the very bottom. Someone who has just been moved by
       // a message is the likeliest person to send one — but they never asked to
       // be here, so it stays an aside rather than a pitch.
       copy.passItOn(
-        `<a href="${absoluteUrl("/send")}" style="color:#94897C;">`,
+        `<a href="${absoluteUrl(`/${locale}/send`)}" style="color:#94897C;">`,
         "</a>",
       ),
-      `<a href="${unsubscribeUrl}" style="color:#94897C;">${copy.stopReceiving}</a> &nbsp;·&nbsp; <a href="${absoluteUrl("/privacy")}" style="color:#94897C;">${copy.privacy}</a>`,
+      `<a href="${unsubscribeUrl}" style="color:#94897C;">${copy.stopReceiving}</a> &nbsp;·&nbsp; <a href="${absoluteUrl(`/${locale}/privacy`)}" style="color:#94897C;">${copy.privacy}</a>`,
     ].join("<br /><br />"),
   });
 
@@ -82,8 +82,8 @@ export function recipientMessageEmail({
       : copy.greetingFallback,
     body,
     anonymousNote,
-    `${copy.whatIsThis} ${absoluteUrl("/received")}`,
-    `${copy.passItOn("", "")} ${absoluteUrl("/send")}`,
+    `${copy.whatIsThis} ${absoluteUrl(`/${locale}/received`)}`,
+    `${copy.passItOn("", "")} ${absoluteUrl(`/${locale}/send`)}`,
     `${copy.stopReceiving}: ${unsubscribeUrl}`,
   ]);
 

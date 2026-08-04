@@ -59,10 +59,10 @@ export function subscriptionCancelledEmail({
       paragraph(
         `Whatever the reason — thank you for the ${messagesSent} ${messagesSent === 1 ? "morning" : "mornings"} you gave someone. They never found out it was you, which is rather the point.`,
       ),
-      button("Start another plan", absoluteUrl("/send")),
+      button("Start another plan", absoluteUrl("/en/send")),
       spacer(32),
     ].join(""),
-    footerHtml: `Questions: ${siteConfig.supportEmail} &nbsp;·&nbsp; <a href="${absoluteUrl("/terms")}" style="color:#94897C;">Terms</a> &nbsp;·&nbsp; <a href="${absoluteUrl("/privacy")}" style="color:#94897C;">Privacy</a>`,
+    footerHtml: `Questions: ${siteConfig.supportEmail} &nbsp;·&nbsp; <a href="${absoluteUrl("/en/terms")}" style="color:#94897C;">Terms</a> &nbsp;·&nbsp; <a href="${absoluteUrl("/en/privacy")}" style="color:#94897C;">Privacy</a>`,
   });
 
   const text = toPlainText([
@@ -71,7 +71,7 @@ export function subscriptionCancelledEmail({
       ? `You won't be charged again. ${who} keeps receiving a message each morning until ${endsAt.toISOString().slice(0, 10)}.`
       : `You won't be charged again, and no further messages will go out to ${who}.`,
     `Messages delivered: ${messagesSent}`,
-    `Start another plan: ${absoluteUrl("/send")}`,
+    `Start another plan: ${absoluteUrl("/en/send")}`,
   ]);
 
   return { subject, html, text };

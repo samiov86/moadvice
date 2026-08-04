@@ -7,12 +7,19 @@ import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Someone sent you an anonymous message",
-  description:
-    "You received a message from Mo Advice and don't know who sent it. Here's what happened, why we can't tell you, and how to stop them if you'd rather not receive any more.",
-  alternates: { canonical: "/received" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: "Someone sent you an anonymous message",
+    description:
+      "You received a message from Mo Advice and don't know who sent it. Here's what happened, why we can't tell you, and how to stop them if you'd rather not receive any more.",
+    alternates: { canonical: `/${locale}/received` },
+  };
+}
 
 /**
  * Where a recipient lands.

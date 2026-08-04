@@ -3,11 +3,18 @@ import type { Metadata } from "next";
 import { LegalShell } from "@/components/legal-shell";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: `What ${siteConfig.name} stores about senders and recipients, why recipients get the stricter treatment, who processes data for us, and how to have yours deleted.`,
-  alternates: { canonical: "/privacy" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: "Privacy Policy",
+    description: `What ${siteConfig.name} stores about senders and recipients, why recipients get the stricter treatment, who processes data for us, and how to have yours deleted.`,
+    alternates: { canonical: `/${locale}/privacy` },
+  };
+}
 
 export default function PrivacyPage() {
   return (

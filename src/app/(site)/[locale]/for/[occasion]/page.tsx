@@ -12,7 +12,7 @@ import { absoluteUrl } from "@/lib/site";
 import { breadcrumbSchema, jsonLd } from "@/lib/structured-data";
 
 interface OccasionPageProps {
-  params: Promise<{ occasion: string }>;
+  params: Promise<{ locale: string; occasion: string }>;
 }
 
 export function generateStaticParams() {
@@ -22,14 +22,14 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: OccasionPageProps): Promise<Metadata> {
-  const { occasion: slug } = await params;
+  const { locale, occasion: slug } = await params;
   const occasion = getOccasion(slug);
   if (!occasion) return {};
 
   return {
     title: { absolute: `${occasion.title} · Mo Advice` },
     description: occasion.metaDescription,
-    alternates: { canonical: `/for/${occasion.slug}` },
+    alternates: { canonical: `/${locale}/for/${occasion.slug}` },
     openGraph: {
       type: "article",
       title: occasion.title,

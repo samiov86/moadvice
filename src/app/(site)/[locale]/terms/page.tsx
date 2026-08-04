@@ -3,11 +3,18 @@ import type { Metadata } from "next";
 import { LegalShell } from "@/components/legal-shell";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: `The terms behind ${siteConfig.name}: what the service does, what it costs, how cancellation and refunds work, and the rules that keep anonymity a feature for kindness.`,
-  alternates: { canonical: "/terms" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: "Terms of Service",
+    description: `The terms behind ${siteConfig.name}: what the service does, what it costs, how cancellation and refunds work, and the rules that keep anonymity a feature for kindness.`,
+    alternates: { canonical: `/${locale}/terms` },
+  };
+}
 
 export default function TermsPage() {
   return (

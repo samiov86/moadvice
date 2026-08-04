@@ -65,7 +65,7 @@ export function deliveryFailedEmail({
         `If the address had a typo in it, sending again with the correct one is the quickest fix. If it looked right to you, tell us — that means the fault is ours to find.`,
         { size: 14 },
       ),
-      button("Try again", absoluteUrl("/send")),
+      button("Try again", absoluteUrl("/en/send")),
       spacer(32),
     ].join(""),
     footerHtml: `Questions: ${siteConfig.supportEmail}`,
@@ -78,7 +78,7 @@ export function deliveryFailedEmail({
       ? `We've refunded ${formatMoney(amountCents, currency)} to your card, usually visible within five to ten business days.`
       : `We're refunding ${formatMoney(amountCents, currency)}.`,
     `Order: ${orderId}`,
-    `Try again: ${absoluteUrl("/send")}`,
+    `Try again: ${absoluteUrl("/en/send")}`,
   ]);
 
   return { subject, html, text };

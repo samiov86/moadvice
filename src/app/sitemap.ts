@@ -5,6 +5,10 @@ import { CATEGORY_PAGES } from "@/lib/message-categories";
 import { OCCASIONS } from "@/lib/occasions";
 
 /**
+ * Lists /en only. Spanish pages exist but still render English copy, so they
+ * are deliberately not advertised — nor is there an hreflang pair yet. Both
+ * arrive when the translation does.
+ *
  * `lastmod` is omitted where we don't genuinely track a change date.
  *
  * It previously used `new Date()`, which told crawlers every page had changed
@@ -16,36 +20,36 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const legalUpdated = new Date(siteConfig.legalUpdatedAt);
 
   return [
-    { url: absoluteUrl("/"), priority: 1, changeFrequency: "weekly" },
-    { url: absoluteUrl("/send"), priority: 0.9, changeFrequency: "monthly" },
+    { url: absoluteUrl("/en"), priority: 1, changeFrequency: "weekly" },
+    { url: absoluteUrl("/en/send"), priority: 0.9, changeFrequency: "monthly" },
     // The message bank — the only pages here with substantial readable content,
     // and the reason anyone might arrive from a search at all.
-    { url: absoluteUrl("/messages"), priority: 0.8, changeFrequency: "monthly" },
+    { url: absoluteUrl("/en/messages"), priority: 0.8, changeFrequency: "monthly" },
     ...CATEGORY_PAGES.map((page) => ({
-      url: absoluteUrl(`/messages/${page.slug}`),
+      url: absoluteUrl(`/en/messages/${page.slug}`),
       priority: 0.8,
       changeFrequency: "monthly" as const,
     })),
     // Occasion guides. /m/[slug] is deliberately absent: those are noindex,
     // existing to be shared rather than found.
     ...OCCASIONS.map((occasion) => ({
-      url: absoluteUrl(`/for/${occasion.slug}`),
+      url: absoluteUrl(`/en/for/${occasion.slug}`),
       priority: 0.7,
       changeFrequency: "yearly" as const,
     })),
-    { url: absoluteUrl("/received"), priority: 0.5, changeFrequency: "yearly" },
+    { url: absoluteUrl("/en/received"), priority: 0.5, changeFrequency: "yearly" },
     {
-      url: absoluteUrl("/terms"),
+      url: absoluteUrl("/en/terms"),
       lastModified: legalUpdated,
       priority: 0.3,
       changeFrequency: "yearly",
     },
     {
-      url: absoluteUrl("/privacy"),
+      url: absoluteUrl("/en/privacy"),
       lastModified: legalUpdated,
       priority: 0.3,
       changeFrequency: "yearly",
     },
-    { url: absoluteUrl("/contact"), priority: 0.4, changeFrequency: "yearly" },
+    { url: absoluteUrl("/en/contact"), priority: 0.4, changeFrequency: "yearly" },
   ];
 }

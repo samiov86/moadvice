@@ -8,7 +8,7 @@ import {
   cancelSubscription,
   resumeSubscription,
   type ActionResult,
-} from "@/app/dashboard/actions";
+} from "@/app/(utility)/dashboard/actions";
 
 /** Cancel / resume for one daily plan, with inline feedback. */
 export function SubscriptionControls({

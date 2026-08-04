@@ -12,7 +12,7 @@ import { absoluteUrl, siteConfig } from "@/lib/site";
 import { breadcrumbSchema, jsonLd } from "@/lib/structured-data";
 
 interface CategoryPageProps {
-  params: Promise<{ category: string }>;
+  params: Promise<{ locale: string; category: string }>;
 }
 
 /** Both categories are known at build time, so these render statically. */
@@ -23,7 +23,7 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
-  const { category } = await params;
+  const { locale, category } = await params;
   const page = getCategoryPage(category);
   if (!page) return {};
 
@@ -32,7 +32,7 @@ export async function generateMetadata({
     // characters Google shows. The phrasing is the part worth keeping whole.
     title: { absolute: page.title },
     description: page.metaDescription,
-    alternates: { canonical: `/messages/${page.slug}` },
+    alternates: { canonical: `/${locale}/messages/${page.slug}` },
     openGraph: {
       title: `${page.title} · ${siteConfig.name}`,
       description: page.metaDescription,

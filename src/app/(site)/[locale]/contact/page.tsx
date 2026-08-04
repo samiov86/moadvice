@@ -4,11 +4,18 @@ import type { Metadata } from "next";
 import { LegalShell } from "@/components/legal-shell";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: `Contact ${siteConfig.name} — stop receiving messages, cancel a daily plan, query a charge, or report misuse. One inbox, read by a person, usually answered within a day.`,
-  alternates: { canonical: "/contact" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: "Contact",
+    description: `Contact ${siteConfig.name} — stop receiving messages, cancel a daily plan, query a charge, or report misuse. One inbox, read by a person, usually answered within a day.`,
+    alternates: { canonical: `/${locale}/contact` },
+  };
+}
 
 export default function ContactPage() {
   return (

@@ -26,11 +26,18 @@ import {
   websiteSchema,
 } from "@/lib/structured-data";
 
-export const metadata: Metadata = {
-  // Without this, /?utm_source=… and any other parameterised variant can be
-  // indexed as a separate page competing with the real one.
-  alternates: { canonical: "/" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    // Without this, /?utm_source=… and any other parameterised variant can be
+    // indexed as a separate page competing with the real one.
+    alternates: { canonical: `/${locale}` },
+  };
+}
 
 const HOW_IT_WORKS = [
   {

@@ -12,11 +12,18 @@ import { OCCASIONS } from "@/lib/occasions";
 import { absoluteUrl, siteConfig } from "@/lib/site";
 import { breadcrumbSchema, jsonLd } from "@/lib/structured-data";
 
-export const metadata: Metadata = {
-  title: `Every message we send`,
-  description: `All ${MESSAGE_BANK.length} messages in the ${siteConfig.name} bank, free to read — hand-written words of encouragement and recognition for the people in your life and at work.`,
-  alternates: { canonical: "/messages" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: `Every message we send`,
+    description: `All ${MESSAGE_BANK.length} messages in the ${siteConfig.name} bank, free to read — hand-written words of encouragement and recognition for the people in your life and at work.`,
+    alternates: { canonical: `/${locale}/messages` },
+  };
+}
 
 export default function MessagesIndexPage() {
   // A few from each bank as a taste; the category pages carry the full set.
@@ -31,7 +38,7 @@ export default function MessagesIndexPage() {
       "@type": "CollectionPage",
       "@id": absoluteUrl("/messages#collection"),
       name: "Every message we send",
-      description: metadata.description,
+      description: `All ${MESSAGE_BANK.length} messages in the ${siteConfig.name} bank, free to read.`,
       url: absoluteUrl("/messages"),
       isPartOf: { "@id": absoluteUrl("/#website") },
       hasPart: CATEGORY_PAGES.map((page) => ({

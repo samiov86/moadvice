@@ -6,12 +6,19 @@ import { SendForm } from "@/components/send/send-form";
 import { auth } from "@/lib/auth";
 import type { PlanId } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Send kind words",
-  description:
-    "Send an anonymous compliment by email. One message for $1, or a different one every morning for $5 a month.",
-  alternates: { canonical: "/send" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: "Send kind words",
+    description:
+      "Send an anonymous compliment by email. One message for $1, or a different one every morning for $5 a month.",
+    alternates: { canonical: `/${locale}/send` },
+  };
+}
 
 interface SendPageProps {
   searchParams: Promise<{ plan?: string; canceled?: string }>;

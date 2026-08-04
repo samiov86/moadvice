@@ -71,7 +71,7 @@ export function subscriptionStartedEmail({
     ].join(""),
     footerHtml: [
       `Your card statement will show <strong>${siteConfig.domain}</strong>. Stripe emails a receipt for every monthly charge.`,
-      `Questions: ${siteConfig.supportEmail} &nbsp;·&nbsp; <a href="${absoluteUrl("/terms")}" style="color:#94897C;">Terms</a>`,
+      `Questions: ${siteConfig.supportEmail} &nbsp;·&nbsp; <a href="${absoluteUrl("/en/terms")}" style="color:#94897C;">Terms</a>`,
     ].join("<br /><br />"),
   });
 

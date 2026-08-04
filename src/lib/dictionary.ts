@@ -135,7 +135,7 @@ export interface Dictionary {
 export const dictionaries: Record<SiteLocale, Dictionary> = {
   en: {
     locale: "en",
-    prefix: "",
+    prefix: "/en",
     htmlLang: "en",
     nav: {
       howItWorks: "How it works",
@@ -520,6 +520,6 @@ export function getDictionary(locale: SiteLocale): Dictionary {
 /** Prefixes an internal path for the given locale. */
 export function localePath(locale: SiteLocale, path: string): string {
   const prefix = dictionaries[locale].prefix;
-  if (path === "/") return prefix || "/";
+  if (path === "/") return prefix;
   return `${prefix}${path}`;
 }

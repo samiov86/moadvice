@@ -60,7 +60,7 @@ export function senderReceiptEmail({
       note(
         `Want to keep it going? A daily plan sends a different message every morning for ${formatMoney(500)} a month.`,
       ),
-      button("Send to someone else", absoluteUrl("/send")),
+      button("Send to someone else", absoluteUrl("/en/send")),
       spacer(32),
     ].join(""),
     footerHtml: [
@@ -70,7 +70,7 @@ export function senderReceiptEmail({
         ? `You confirmed at checkout: &ldquo;${escapeAttr(withdrawalConsentText)}&rdquo;`
         : "",
       `Your card statement will show <strong>${siteConfig.domain}</strong>. Stripe has also emailed you a formal receipt.`,
-      `One-off messages are non-refundable once sent — see the <a href="${absoluteUrl("/terms")}" style="color:#94897C;">Terms</a>. Questions: ${siteConfig.supportEmail}`,
+      `One-off messages are non-refundable once sent — see the <a href="${absoluteUrl("/en/terms")}" style="color:#94897C;">Terms</a>. Questions: ${siteConfig.supportEmail}`,
     ]
       .filter(Boolean)
       .join("<br /><br />"),
@@ -82,7 +82,7 @@ export function senderReceiptEmail({
     `Tone: ${theme === "PERSONAL" ? "Personal" : "Professional"}`,
     `Paid: ${formatMoney(amountCents, currency)}`,
     `Order: ${orderId}`,
-    `Send to someone else: ${absoluteUrl("/send")}`,
+    `Send to someone else: ${absoluteUrl("/en/send")}`,
     "One-off messages are non-refundable once sent.",
   ]);
 

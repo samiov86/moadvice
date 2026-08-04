@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   BillingPortalButton,
   SubscriptionControls,
-} from "@/app/dashboard/subscription-actions";
+} from "@/app/(utility)/dashboard/subscription-actions";
 import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/lib/utils";
