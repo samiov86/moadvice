@@ -5,10 +5,16 @@ import { prisma } from "@/lib/prisma";
 import { env } from "@/lib/env";
 import { auth } from "@/lib/auth";
 import { stripe, ensureStripeCustomer } from "@/lib/stripe";
-import { PLANS, WITHDRAWAL_CONSENT_TEXT, absoluteUrl } from "@/lib/site";
+import {
+  DEFAULT_LOCALE,
+  PLANS,
+  WITHDRAWAL_CONSENT_TEXT,
+  absoluteUrl,
+} from "@/lib/site";
 import { normalizeEmail } from "@/lib/utils";
 import { clientIpFrom, ipRateLimit, senderRateLimit } from "@/lib/rate-limit";
 import { isValidTimeZone } from "@/lib/timezone";
+import { isSupportedLocale } from "@/lib/locales";
 
 export const runtime = "nodejs";
 
@@ -18,6 +24,14 @@ const checkoutSchema = z.object({
   senderEmail: z.string().trim().min(3).max(254).email(),
   theme: z.enum(["PERSONAL", "PROFESSIONAL"]),
   plan: z.enum(["ONE_OFF", "DAILY"]),
+  /** Language the recipient is written to in. */
+  locale: z
+    .string()
+    .max(12)
+    .optional()
+    .refine((value) => value === undefined || isSupportedLocale(value), {
+      message: "We don't write in that language yet",
+    }),
   /** Daily plans only — when the recipient should get it, in their own time. */
   sendHour: z.coerce.number().int().min(0).max(23).optional(),
   /**
@@ -160,6 +174,7 @@ export async function POST(request: Request) {
         sendHour: plan === "DAILY" ? (parsed.data.sendHour ?? 6) : null,
         sendTimezone:
           plan === "DAILY" ? (parsed.data.sendTimezone ?? "UTC") : null,
+        locale: parsed.data.locale ?? DEFAULT_LOCALE,
         withdrawalConsentAt: new Date(),
         withdrawalConsentText: WITHDRAWAL_CONSENT_TEXT,
       },

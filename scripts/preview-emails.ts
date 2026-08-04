@@ -16,6 +16,7 @@ import { subscriptionStartedEmail } from "../src/emails/subscription-started";
 import { subscriptionCancelledEmail } from "../src/emails/subscription-cancelled";
 import { magicLinkEmail } from "../src/emails/magic-link";
 import { MESSAGE_BANK } from "../src/data/message-bank";
+import { MESSAGE_BANK_ES } from "../src/data/message-bank-es";
 
 const OUT_DIR = path.join(process.cwd(), ".email-previews");
 
@@ -48,6 +49,18 @@ async function main() {
         body: professional.body,
         unsubscribeUrl,
         isDaily: true,
+      }).html,
+    },
+    {
+      name: "recipient-spanish",
+      subject: "Alguien quería que leyeras esto",
+      html: recipientMessageEmail({
+        recipientName: "Alex",
+        headline: MESSAGE_BANK_ES[0].headline,
+        body: MESSAGE_BANK_ES[0].body,
+        unsubscribeUrl,
+        isDaily: true,
+        locale: "es",
       }).html,
     },
     render(

@@ -1,8 +1,8 @@
 import type { MessageCategory, MessageTemplate } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import { SUBJECT_LINES } from "@/data/message-bank";
 import { DEFAULT_LOCALE } from "@/lib/site";
+import { localeContent } from "@/lib/locales";
 
 /**
  * Choose the next message for a recipient.
@@ -56,6 +56,10 @@ export async function pickTemplateForRecipient(
  * morning. Seeded by how many messages they've had, not at random, so a retried
  * send produces the same subject.
  */
-export function subjectForDelivery(sequence: number): string {
-  return SUBJECT_LINES[Math.abs(sequence) % SUBJECT_LINES.length];
+export function subjectForDelivery(
+  sequence: number,
+  locale: string = DEFAULT_LOCALE,
+): string {
+  const lines = localeContent(locale).subjectLines;
+  return lines[Math.abs(sequence) % lines.length];
 }

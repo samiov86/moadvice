@@ -18,6 +18,7 @@ import {
   type ThemeId,
 } from "@/lib/site";
 import { SEND_HOURS } from "@/lib/timezone";
+import { LOCALES } from "@/lib/locales";
 import { cn } from "@/lib/utils";
 
 const STEPS = ["Who", "Tone", "How often", "Pay"] as const;
@@ -32,6 +33,7 @@ interface FormState {
   senderEmail: string;
   sendHour: number;
   sendTimezone: string;
+  locale: string;
   withdrawalConsent: boolean;
 }
 
@@ -93,6 +95,7 @@ export function SendForm({
     // and guessing during SSR would cause a hydration mismatch.
     sendHour: 8,
     sendTimezone: "UTC",
+    locale: "en",
     withdrawalConsent: false,
   });
 
@@ -191,6 +194,7 @@ export function SendForm({
           senderEmail: form.senderEmail.trim(),
           theme: form.theme,
           plan: form.plan,
+          locale: form.locale,
           withdrawalConsent: form.withdrawalConsent,
           ...(form.plan === "DAILY"
             ? { sendHour: form.sendHour, sendTimezone: form.sendTimezone }
@@ -314,6 +318,26 @@ export function SendForm({
                   </RadioCard>
                 ))}
               </RadioGroup>
+
+              <div className="space-y-2 rounded-2xl border border-border bg-secondary/40 p-5">
+                <Label htmlFor="locale">What language do they read in?</Label>
+                <select
+                  id="locale"
+                  value={form.locale}
+                  onChange={(e) => update("locale", e.target.value)}
+                  className="h-12 w-full rounded-xl border border-input bg-card px-4 text-base text-foreground shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25"
+                >
+                  {Object.values(LOCALES).map((entry) => (
+                    <option key={entry.code} value={entry.code}>
+                      {entry.nativeName}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-sm text-muted-foreground">
+                  Each language has its own messages, written in it rather than
+                  translated. This site stays in English either way.
+                </p>
+              </div>
             </StepPanel>
           )}
 
@@ -457,6 +481,9 @@ export function SendForm({
                     : form.recipientEmail.trim()}
                 </Summary>
                 <Summary label="Tone">{theme.name}</Summary>
+                <Summary label="Language">
+                  {LOCALES[form.locale]?.nativeName ?? form.locale}
+                </Summary>
                 <Summary label="Plan">
                   {plan.name} · {plan.price} {plan.priceSuffix}
                 </Summary>

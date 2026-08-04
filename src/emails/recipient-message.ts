@@ -10,6 +10,7 @@ import {
   toPlainText,
 } from "@/emails/layout";
 import { siteConfig, absoluteUrl } from "@/lib/site";
+import { localeContent } from "@/lib/locales";
 
 export interface RecipientMessageEmailParams {
   /** Optional first name — used only in the greeting, never elsewhere. */
@@ -20,6 +21,8 @@ export interface RecipientMessageEmailParams {
   unsubscribeUrl: string;
   /** Daily recipients get a light "this arrives each morning" line. */
   isDaily: boolean;
+  /** Language every fixed string in the email is rendered in. */
+  locale?: string;
 }
 
 /**
@@ -35,50 +38,53 @@ export function recipientMessageEmail({
   body,
   unsubscribeUrl,
   isDaily,
+  locale = "en",
 }: RecipientMessageEmailParams) {
+  const copy = localeContent(locale).email;
   const greeting = recipientName?.trim()
-    ? `${escapeHtml(recipientName.trim())},`
-    : "Hello,";
+    ? copy.greeting(escapeHtml(recipientName.trim()))
+    : copy.greetingFallback;
+  const anonymousNote = isDaily ? copy.anonymousNoteDaily : copy.anonymousNote;
 
   const html = emailShell({
     preheader: headline,
     showBranding: false,
     body: [
       accentBar(),
-      eyebrow("Someone wanted you to read this"),
+      eyebrow(copy.eyebrow),
       heading(headline),
       paragraph(greeting, { size: 16 }),
       messageBody(body),
       spacer(8),
-      paragraph(
-        `<span style="color:#94897C;">Sent anonymously. Someone who knows you chose these words for you${
-          isDaily ? ", and picked out a new one for every morning this month" : ""
-        }.</span>`,
-        { size: 14 },
-      ),
+      paragraph(`<span style="color:#94897C;">${anonymousNote}</span>`, {
+        size: 14,
+      }),
       spacer(32),
     ].join(""),
     footerHtml: [
-      `${escapeHtml(siteConfig.name)} delivers anonymous compliments by email. You don't have an account and we never sell or share your address. <a href="${absoluteUrl("/received")}" style="color:#94897C;">What is this?</a>`,
+      `${escapeHtml(siteConfig.name)} ${copy.brandFooter} <a href="${absoluteUrl("/received")}" style="color:#94897C;">${copy.whatIsThis}</a>`,
       // One line, once, at the very bottom. Someone who has just been moved by
       // a message is the likeliest person to send one — but they never asked to
       // be here, so it stays an aside rather than a pitch.
-      `If it made you think of someone, you can <a href="${absoluteUrl("/send")}" style="color:#94897C;">send one too</a>.`,
-      `<a href="${unsubscribeUrl}" style="color:#94897C;">Stop receiving these</a> &nbsp;·&nbsp; <a href="${absoluteUrl("/privacy")}" style="color:#94897C;">Privacy</a>`,
+      copy.passItOn(
+        `<a href="${absoluteUrl("/send")}" style="color:#94897C;">`,
+        "</a>",
+      ),
+      `<a href="${unsubscribeUrl}" style="color:#94897C;">${copy.stopReceiving}</a> &nbsp;·&nbsp; <a href="${absoluteUrl("/privacy")}" style="color:#94897C;">${copy.privacy}</a>`,
     ].join("<br /><br />"),
   });
 
   const text = toPlainText([
-    "SOMEONE WANTED YOU TO READ THIS",
+    copy.eyebrow.toUpperCase(),
     headline,
-    recipientName?.trim() ? `${recipientName.trim()},` : "Hello,",
+    recipientName?.trim()
+      ? copy.greeting(recipientName.trim())
+      : copy.greetingFallback,
     body,
-    `Sent anonymously. Someone who knows you chose these words for you${
-      isDaily ? ", and picked out a new one for every morning this month" : ""
-    }.`,
-    `What is this? ${absoluteUrl("/received")}`,
-    `If it made you think of someone, you can send one too: ${absoluteUrl("/send")}`,
-    `Stop receiving these: ${unsubscribeUrl}`,
+    anonymousNote,
+    `${copy.whatIsThis} ${absoluteUrl("/received")}`,
+    `${copy.passItOn("", "")} ${absoluteUrl("/send")}`,
+    `${copy.stopReceiving}: ${unsubscribeUrl}`,
   ]);
 
   return { html, text };

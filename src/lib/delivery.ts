@@ -86,7 +86,7 @@ export async function deliverMessage({
     where: { recipientId, status: "SENT" },
   });
 
-  const subject = subjectForDelivery(deliveredCount);
+  const subject = subjectForDelivery(deliveredCount, locale);
 
   // Two URLs for the same thing: the visible footer link opens a page with a
   // confirmation, while the List-Unsubscribe header needs an endpoint that
@@ -104,6 +104,7 @@ export async function deliverMessage({
     body: template.body,
     unsubscribeUrl: unsubscribePageUrl,
     isDaily,
+    locale,
   });
 
   const result = await sendEmail({
