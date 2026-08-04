@@ -44,7 +44,38 @@ export interface Dictionary {
     stopReceiving: string;
     cookieChoices: string;
     questions: string;
-    tradingAs: (name: string, nif: string, address: string) => string;
+    /** Templated: {name}, {nif}, {address}. */
+    tradingAs: string;
+  };
+
+  /** Tone cards. The examples are real messages from that language's bank. */
+  themes: {
+    id: "PERSONAL" | "PROFESSIONAL";
+    name: string;
+    blurb: string;
+    exampleHeadline: string;
+    example: string;
+  }[];
+
+  /** Plan copy. Prices stay in USD — Stripe charges in USD either way. */
+  plans: Record<
+    "ONE_OFF" | "DAILY",
+    {
+      name: string;
+      /** Formatted per locale: Spanish writes the symbol after the number. */
+      price: string;
+      priceSuffix: string;
+      blurb: string;
+      features: string[];
+    }
+  >;
+
+  consent: {
+    message: string;
+    howWeHandleData: string;
+    decline: string;
+    accept: string;
+    regionLabel: string;
   };
 
   home: {
@@ -75,10 +106,12 @@ export interface Dictionary {
     pricingNote: string;
     refundPolicy: string;
     showcaseEyebrow: string;
-    showcaseHeading: (count: number) => string;
+    /** Templated: {count}. */
+    showcaseHeading: string;
     showcaseBody: string;
     showcaseNote: string;
-    readAll: (count: number) => string;
+    /** Templated: {count}. */
+    readAll: string;
     faqHeading: string;
     faqs: { q: string; a: string }[];
     finalHeading: string;
@@ -108,7 +141,9 @@ export interface Dictionary {
     whenBody: string;
     timeOfDay: string;
     theirTimezone: string;
-    dailyNote: (time: string) => string;
+    /** Templated, not a function: this dictionary crosses into a client
+     * component, and functions can't be serialised over that boundary. */
+    dailyNote: string;
     payTitle: string;
     payBody: string;
     yourEmail: string;
@@ -122,11 +157,12 @@ export interface Dictionary {
     consent: string;
     back: string;
     continueLabel: string;
-    payLabel: (price: string) => string;
+    payLabel: string;
     opening: string;
     smallPrint: string;
     previewLabel: string;
-    previewNote: (tone: string, daily: boolean) => string;
+    previewNote: string;
+    previewNoteDailySuffix: string;
     genericError: string;
     networkError: string;
   };
@@ -162,8 +198,61 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
       stopReceiving: "Stop receiving messages",
       cookieChoices: "Cookie choices",
       questions: "Questions?",
-      tradingAs: (name, nif, address) =>
-        `Mo Advice is a trading name of ${name}, NIF ${nif}, ${address}.`,
+      tradingAs: "Mo Advice is a trading name of {name}, NIF {nif}, {address}.",
+    },
+    themes: [
+      {
+        id: "PERSONAL",
+        name: "Personal",
+        blurb:
+          "For a friend, a partner, a parent, someone having a hard month.",
+        exampleHeadline: "You are somebody's safe place",
+        example:
+          "There is a person who thinks of you when something goes wrong, before they have thought about what to do. You may never be told that. It is one of the highest things a human being can be to another one.",
+      },
+      {
+        id: "PROFESSIONAL",
+        name: "Professional",
+        blurb:
+          "For a colleague, a report, a manager, someone carrying a lot at work.",
+        exampleHeadline: "You are the reason things don't fall through",
+        example:
+          "There is a kind of work that only gets noticed when it stops, and you have been doing it for a long time without stopping. It is not glamorous and it is not accidental — it is a standard you hold when no one is checking.",
+      },
+    ],
+    plans: {
+      ONE_OFF: {
+        name: "One message",
+        price: "$1",
+        priceSuffix: "once",
+        blurb: "A single set of kind words, delivered right away.",
+        features: [
+          "Sent within a minute of paying",
+          "Completely anonymous",
+          "Personal or professional tone",
+          "No account needed for them",
+        ],
+      },
+      DAILY: {
+        name: "Daily words",
+        price: "$5",
+        priceSuffix: "per month",
+        blurb: "One new message every morning, for as long as you like.",
+        features: [
+          "A different message every day, at a time you choose",
+          "Never repeats until the whole bank is used",
+          "Cancel any time in one click",
+          "Run several at once, for different people",
+        ],
+      },
+    },
+    consent: {
+      message:
+        "We'd like to use Google Analytics to understand how people find this site. It sets cookies, so we only will if you say yes — decline and nothing is stored on your device.",
+      howWeHandleData: "How we handle data",
+      decline: "Decline",
+      accept: "Accept",
+      regionLabel: "Cookie choices",
     },
     home: {
       metaTitle: "Mo Advice — Anonymous compliments that feel like good advice",
@@ -223,12 +312,12 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
         "Payments handled by Stripe. One-off messages are non-refundable once delivered — see the ",
       refundPolicy: "refund policy",
       showcaseEyebrow: "The actual words",
-      showcaseHeading: (count) => `Four of the ${count}, exactly as they arrive`,
+      showcaseHeading: "Four of the {count}, exactly as they arrive",
       showcaseBody:
         "Every message is written and edited by hand. No templates with a name slotted in, nothing generated on the fly — just specific things that are true of someone, said plainly.",
       showcaseNote:
         "A daily plan works through the bank without repeating, so nobody receives the same message twice until they've seen them all.",
-      readAll: (count) => `Read all ${count} of them`,
+      readAll: "Read all {count} of them",
       faqHeading: "Questions people ask",
       faqs: [
         {
@@ -292,8 +381,8 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
         "In their time, not yours — so “morning” means morning where they are.",
       timeOfDay: "Time of day",
       theirTimezone: "Their timezone",
-      dailyNote: (time) =>
-        `The first message goes out straight away. After that, one arrives every day at ${time} their time. Cancel any time — you keep the days you've paid for.`,
+      dailyNote:
+        "The first message goes out straight away. After that, one arrives every day at {time} their time. Cancel any time — you keep the days you've paid for.",
       payTitle: "Where should the receipt go?",
       payBody:
         "Yours, not theirs. This is also how you sign in later to manage or cancel a plan.",
@@ -310,13 +399,14 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
         "I want my message sent straight away, and I understand that once it has been sent I lose my right to cancel within 14 days.",
       back: "Back",
       continueLabel: "Continue",
-      payLabel: (price) => `Pay ${price}`,
+      payLabel: "Pay {price}",
       opening: "Opening checkout…",
       smallPrint:
         "Payment is handled by Stripe — we never see your card details. One-off messages are non-refundable once delivered. Daily plans can be cancelled at any time.",
       previewLabel: "What they'll receive",
-      previewNote: (tone, daily) =>
-        `An example from the ${tone} bank. The actual message is chosen when it sends${daily ? ", and a different one goes out each day" : ""}.`,
+      previewNote:
+        "An example from the {tone} bank. The actual message is chosen when it sends{daily}.",
+      previewNoteDailySuffix: ", and a different one goes out each day",
       genericError: "Something went wrong. Please try again.",
       networkError: "We couldn't reach the payment page. Check your connection.",
     },
@@ -351,8 +441,62 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
       stopReceiving: "Dejar de recibir mensajes",
       cookieChoices: "Preferencias de cookies",
       questions: "¿Dudas?",
-      tradingAs: (name, nif, address) =>
-        `Mo Advice es un nombre comercial de ${name}, NIF ${nif}, ${address}.`,
+      tradingAs:
+        "Mo Advice es un nombre comercial de {name}, NIF {nif}, {address}.",
+    },
+    themes: [
+      {
+        id: "PERSONAL",
+        name: "Personal",
+        blurb:
+          "Para un amigo, una pareja, tu madre o tu padre, alguien que está teniendo un mes difícil.",
+        exampleHeadline: "Eres el sitio seguro de alguien",
+        example:
+          "Hay una persona que piensa en ti cuando algo va mal, antes incluso de pensar qué hacer. Puede que nunca te lo diga. Es de las cosas más altas que un ser humano puede ser para otro.",
+      },
+      {
+        id: "PROFESSIONAL",
+        name: "Profesional",
+        blurb:
+          "Para un compañero, alguien de tu equipo, tu jefa, alguien que carga con mucho en el trabajo.",
+        exampleHeadline: "Si las cosas no se caen, es porque estás tú",
+        example:
+          "Hay un tipo de trabajo que solo se nota cuando deja de hacerse, y tú llevas mucho tiempo sin dejar de hacerlo. No es vistoso y no es casualidad: es un listón que mantienes cuando nadie está mirando.",
+      },
+    ],
+    plans: {
+      ONE_OFF: {
+        name: "Un mensaje",
+        price: "1 $",
+        priceSuffix: "una vez",
+        blurb: "Unas palabras buenas, entregadas ahora mismo.",
+        features: [
+          "Se envía menos de un minuto después de pagar",
+          "Completamente anónimo",
+          "Tono personal o profesional",
+          "Quien lo recibe no necesita cuenta",
+        ],
+      },
+      DAILY: {
+        name: "Palabras diarias",
+        price: "5 $",
+        priceSuffix: "al mes",
+        blurb: "Un mensaje nuevo cada mañana, mientras tú quieras.",
+        features: [
+          "Un mensaje distinto cada día, a la hora que elijas",
+          "No se repite hasta agotar el banco entero",
+          "Se cancela en un clic",
+          "Puedes tener varios a la vez, para distintas personas",
+        ],
+      },
+    },
+    consent: {
+      message:
+        "Nos gustaría usar Google Analytics para entender cómo llega la gente a este sitio. Usa cookies, así que solo lo haremos si nos dices que sí: si rechazas, no se guarda nada en tu dispositivo.",
+      howWeHandleData: "Cómo tratamos los datos",
+      decline: "Rechazar",
+      accept: "Aceptar",
+      regionLabel: "Preferencias de cookies",
     },
     home: {
       metaTitle: "Mo Advice — Cumplidos anónimos que suenan a buen consejo",
@@ -412,13 +556,12 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
         "Los pagos los gestiona Stripe. Los mensajes sueltos no se devuelven una vez enviados: consulta la ",
       refundPolicy: "política de devoluciones",
       showcaseEyebrow: "Las palabras de verdad",
-      showcaseHeading: (count) =>
-        `Cuatro de los ${count}, tal y como llegan`,
+      showcaseHeading: "Cuatro de los {count}, tal y como llegan",
       showcaseBody:
         "Todos los mensajes están escritos y editados a mano. Ninguna plantilla con un nombre encajado, nada generado sobre la marcha: cosas concretas que son verdad de alguien, dichas sin adornos.",
       showcaseNote:
         "Un plan diario recorre el banco sin repetir, así que nadie recibe el mismo mensaje dos veces hasta haberlos visto todos.",
-      readAll: (count) => `Léelos los ${count}`,
+      readAll: "Léelos los {count}",
       faqHeading: "Lo que suele preguntarse",
       faqs: [
         {
@@ -482,8 +625,8 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
         "En su hora, no en la tuya, para que «por la mañana» sea por la mañana donde esté.",
       timeOfDay: "Hora del día",
       theirTimezone: "Su zona horaria",
-      dailyNote: (time) =>
-        `El primer mensaje sale enseguida. Después llega uno cada día a las ${time}, hora suya. Cancela cuando quieras: te quedas con los días que ya has pagado.`,
+      dailyNote:
+        "El primer mensaje sale enseguida. Después llega uno cada día a las {time}, hora suya. Cancela cuando quieras: te quedas con los días que ya has pagado.",
       payTitle: "¿Adónde mandamos el recibo?",
       payBody:
         "A ti, no a esa persona. Es también con lo que entrarás luego para gestionar o cancelar un plan.",
@@ -500,21 +643,61 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
         "Quiero que mi mensaje se envíe de inmediato y entiendo que, una vez enviado, pierdo el derecho de desistimiento de 14 días.",
       back: "Atrás",
       continueLabel: "Continuar",
-      payLabel: (price) => `Pagar ${price}`,
+      payLabel: "Pagar {price}",
       opening: "Abriendo el pago…",
       smallPrint:
         "El pago lo gestiona Stripe: nunca vemos los datos de tu tarjeta. Los mensajes sueltos no se devuelven una vez entregados. Los planes diarios se pueden cancelar cuando quieras.",
       previewLabel: "Lo que va a recibir",
-      previewNote: (tone, daily) =>
-        `Un ejemplo del banco ${tone}. El mensaje concreto se elige al enviarlo${daily ? ", y cada día sale uno distinto" : ""}.`,
+      previewNote:
+        "Un ejemplo del banco {tone}. El mensaje concreto se elige al enviarlo{daily}.",
+      previewNoteDailySuffix: ", y cada día sale uno distinto",
       genericError: "Algo ha salido mal. Inténtalo otra vez.",
       networkError: "No hemos podido abrir la página de pago. Revisa tu conexión.",
     },
   },
 };
 
+/**
+ * Just the parts the send form needs.
+ *
+ * It's a client component, so whatever it receives is serialised and shipped to
+ * the browser. Handing over the whole dictionary would put the entire homepage
+ * copy in the bundle of a page that never renders a word of it.
+ */
+export type SendDictionary = {
+  send: Dictionary["send"];
+  themes: Dictionary["themes"];
+  plans: Dictionary["plans"];
+  forLife: string;
+  forWork: string;
+};
+
+export function sendDictionary(dict: Dictionary): SendDictionary {
+  return {
+    send: dict.send,
+    themes: dict.themes,
+    plans: dict.plans,
+    forLife: dict.home.forLife,
+    forWork: dict.home.forWork,
+  };
+}
+
 export function getDictionary(locale: SiteLocale): Dictionary {
   return dictionaries[locale];
+}
+
+/**
+ * Fills {placeholders} in a dictionary string.
+ *
+ * The send dictionary is handed to a client component, so it has to be plain
+ * data — a function would fail to serialise across the boundary with a fairly
+ * unhelpful error.
+ */
+export function fill(
+  template: string,
+  values: Record<string, string>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (_, key) => values[key] ?? "");
 }
 
 /** Prefixes an internal path for the given locale. */

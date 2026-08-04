@@ -10,18 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioCard } from "@/components/ui/radio-group";
 import { EmailPreview } from "@/components/email-preview";
-import {
-  PLANS,
-  THEMES,
-  WITHDRAWAL_CONSENT_TEXT,
-  type PlanId,
-  type ThemeId,
-} from "@/lib/site";
+import { PLANS, type PlanId, type ThemeId } from "@/lib/site";
+import { fill, type SendDictionary } from "@/lib/dictionary";
 import { SEND_HOURS } from "@/lib/timezone";
 import { LOCALES } from "@/lib/locales";
 import { cn } from "@/lib/utils";
-
-const STEPS = ["Who", "Tone", "How often", "Pay"] as const;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -67,6 +60,8 @@ function allTimeZones(detected: string): string[] {
 }
 
 export interface SendFormProps {
+  /** All user-facing copy, in the language of the page this is rendered on. */
+  dict: SendDictionary;
   /** Pre-selected from the pricing table on the homepage. */
   initialPlan?: PlanId;
   /** Pre-filled when the sender is already signed in. */
@@ -76,6 +71,7 @@ export interface SendFormProps {
 }
 
 export function SendForm({
+  dict,
   initialPlan = "ONE_OFF",
   initialSenderEmail = "",
   canceled = false,
@@ -126,7 +122,7 @@ export function SendForm({
   React.useEffect(() => {
     if (trackedSteps.current.has(step)) return;
     trackedSteps.current.add(step);
-    track("send_step_viewed", { step: STEPS[step], position: step + 1 });
+    track("send_step_viewed", { step: steps[step], position: step + 1 });
   }, [step]);
 
   // Changing step swaps the panel in place, which on a short viewport leaves
@@ -144,8 +140,10 @@ export function SendForm({
       ?.focus({ preventScroll: true });
   }, [step]);
 
-  const theme = THEMES.find((t) => t.id === form.theme)!;
+  const steps = dict.send.steps;
+  const theme = dict.themes.find((t) => t.id === form.theme)!;
   const plan = PLANS[form.plan];
+  const planCopy = dict.plans[form.plan];
 
   const stepValid = (index: number) => {
     switch (index) {
@@ -165,7 +163,7 @@ export function SendForm({
   const goNext = () => {
     if (!canContinue) return;
     setError(null);
-    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    setStep((s) => Math.min(s + 1, steps.length - 1));
   };
 
   const goBack = () => {
@@ -206,7 +204,7 @@ export function SendForm({
 
       if (!response.ok || !data.url) {
         track("checkout_failed", { status: response.status });
-        setError(data.error ?? "Something went wrong. Please try again.");
+        setError(data.error ?? dict.send.genericError);
         setSubmitting(false);
         return;
       }
@@ -214,7 +212,7 @@ export function SendForm({
       window.location.assign(data.url);
     } catch {
       track("checkout_failed", { status: 0 });
-      setError("We couldn't reach the payment page. Check your connection.");
+      setError(dict.send.networkError);
       setSubmitting(false);
     }
   }
@@ -222,15 +220,14 @@ export function SendForm({
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-14">
       <form ref={formRef} onSubmit={handleSubmit} noValidate className="scroll-mt-24">
-        <Stepper current={step} onSelect={(index) => {
+        <Stepper steps={steps} current={step} onSelect={(index) => {
           // Allow jumping back to any completed step, never forward past a gap.
           if (index < step) setStep(index);
         }} />
 
         {canceled && step === 0 && (
           <p className="mt-8 rounded-xl border border-border bg-secondary/60 px-4 py-3 text-sm text-muted-foreground">
-            No payment was taken — you closed the checkout. Pick up where you
-            left off whenever you're ready.
+            {dict.send.canceledNote}
           </p>
         )}
 
@@ -238,11 +235,11 @@ export function SendForm({
           {/* ------------------------------------------------ Step 1: Who */}
           {step === 0 && (
             <StepPanel
-              title="Who should hear something good?"
-              description="We only ever email this address the message itself. It's never sold, never shared, and they don't need an account."
+              title={dict.send.whoTitle}
+              description={dict.send.whoBody}
             >
               <div className="space-y-2">
-                <Label htmlFor="recipientEmail">Their email address</Label>
+                <Label htmlFor="recipientEmail">{dict.send.theirEmail}</Label>
                 <Input
                   id="recipientEmail"
                   name="recipientEmail"
@@ -264,9 +261,9 @@ export function SendForm({
 
               <div className="space-y-2">
                 <Label htmlFor="recipientName">
-                  Their first name{" "}
+                  {dict.send.theirName}{" "}
                   <span className="font-normal text-muted-foreground">
-                    (optional)
+                    {dict.send.optional}
                   </span>
                 </Label>
                 <Input
@@ -278,8 +275,7 @@ export function SendForm({
                   onChange={(e) => update("recipientName", e.target.value)}
                 />
                 <p className="text-sm text-muted-foreground">
-                  Used only to open the message. Leave it blank and it starts
-                  with a simple hello.
+                  {dict.send.nameHelp}
                 </p>
               </div>
             </StepPanel>
@@ -288,15 +284,15 @@ export function SendForm({
           {/* ----------------------------------------------- Step 2: Tone */}
           {step === 1 && (
             <StepPanel
-              title="What kind of words?"
-              description="Both banks are written by hand. Pick whichever fits how you know them."
+              title={dict.send.toneTitle}
+              description={dict.send.toneBody}
             >
               <RadioGroup
                 value={form.theme}
                 onValueChange={(value) => update("theme", value as ThemeId)}
                 className="gap-4"
               >
-                {THEMES.map((option) => (
+                {dict.themes.map((option) => (
                   <RadioCard
                     key={option.id}
                     id={`theme-${option.id}`}
@@ -305,14 +301,14 @@ export function SendForm({
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <span className="font-display text-lg">
-                          {option.name}
+                          {dict.themes.find((x) => x.id === option.id)?.name ?? option.name}
                         </span>
                         <p className="mt-1 text-sm text-muted-foreground">
                           {option.blurb}
                         </p>
                       </div>
                       <Badge variant="muted" className="shrink-0">
-                        {option.id === "PERSONAL" ? "For life" : "For work"}
+                        {option.id === "PERSONAL" ? dict.forLife : dict.forWork}
                       </Badge>
                     </div>
                   </RadioCard>
@@ -320,7 +316,7 @@ export function SendForm({
               </RadioGroup>
 
               <div className="space-y-2 rounded-2xl border border-border bg-secondary/40 p-5">
-                <Label htmlFor="locale">What language do they read in?</Label>
+                <Label htmlFor="locale">{dict.send.languageLabel}</Label>
                 <select
                   id="locale"
                   value={form.locale}
@@ -334,9 +330,7 @@ export function SendForm({
                   ))}
                 </select>
                 <p className="text-sm text-muted-foreground">
-                  Each language has its own messages, written in it rather than
-                  translated. This site stays in English either way.
-                </p>
+                  {dict.send.languageHelp}</p>
               </div>
             </StepPanel>
           )}
@@ -344,8 +338,8 @@ export function SendForm({
           {/* ------------------------------------------ Step 3: Frequency */}
           {step === 2 && (
             <StepPanel
-              title="Once, or every morning?"
-              description="Daily plans send a different message each day and never repeat until the whole bank is used."
+              title={dict.send.frequencyTitle}
+              description={dict.send.frequencyBody}
             >
               <RadioGroup
                 value={form.plan}
@@ -361,18 +355,18 @@ export function SendForm({
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <span className="font-display text-lg">
-                          {option.name}
+                          {dict.plans[option.id].name}
                         </span>
                         <p className="mt-1 text-sm text-muted-foreground">
-                          {option.blurb}
+                          {dict.plans[option.id].blurb}
                         </p>
                       </div>
                       <div className="shrink-0 text-right">
                         <div className="font-display text-2xl">
-                          {option.price}
+                          {dict.plans[option.id].price}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {option.priceSuffix}
+                          {dict.plans[option.id].priceSuffix}
                         </div>
                       </div>
                     </div>
@@ -384,17 +378,16 @@ export function SendForm({
                 <div className="space-y-4 rounded-2xl border border-border bg-secondary/40 p-5">
                   <div>
                     <h3 className="font-display text-lg">
-                      When should it arrive?
+                      {dict.send.whenHeading}
                     </h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      In <em>their</em> time, not yours — so &ldquo;morning&rdquo;
-                      means morning where they are.
+                      {dict.send.whenBody}
                     </p>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="sendHour">Time of day</Label>
+                      <Label htmlFor="sendHour">{dict.send.timeOfDay}</Label>
                       <select
                         id="sendHour"
                         value={form.sendHour}
@@ -412,7 +405,7 @@ export function SendForm({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="sendTimezone">Their timezone</Label>
+                      <Label htmlFor="sendTimezone">{dict.send.theirTimezone}</Label>
                       <select
                         id="sendTimezone"
                         value={form.sendTimezone}
@@ -431,13 +424,11 @@ export function SendForm({
                   </div>
 
                   <p className="text-sm text-muted-foreground">
-                    The first message goes out straight away. After that, one
-                    arrives every day at{" "}
-                    <strong className="font-medium text-foreground">
-                      {SEND_HOURS.find((h) => h.hour === form.sendHour)?.label}
-                    </strong>{" "}
-                    their time. Cancel any time — you keep the days you&apos;ve
-                    paid for.
+                    {fill(dict.send.dailyNote, {
+                      time:
+                        SEND_HOURS.find((h) => h.hour === form.sendHour)
+                          ?.label ?? "",
+                    })}
                   </p>
                 </div>
               )}
@@ -447,11 +438,11 @@ export function SendForm({
           {/* -------------------------------------------- Step 4: Payment */}
           {step === 3 && (
             <StepPanel
-              title="Where should the receipt go?"
-              description="Yours, not theirs. This is also how you sign in later to manage or cancel a plan."
+              title={dict.send.payTitle}
+              description={dict.send.payBody}
             >
               <div className="space-y-2">
-                <Label htmlFor="senderEmail">Your email address</Label>
+                <Label htmlFor="senderEmail">{dict.send.yourEmail}</Label>
                 <Input
                   id="senderEmail"
                   name="senderEmail"
@@ -470,31 +461,31 @@ export function SendForm({
                   required
                 />
                 <p className="text-sm text-muted-foreground">
-                  Never shown to them. Nothing in their email points back here.
+                  {dict.send.yourEmailHelp}
                 </p>
               </div>
 
               <dl className="rounded-2xl border border-border bg-secondary/40 p-5 text-sm">
-                <Summary label="To">
+                <Summary label={dict.send.summaryTo}>
                   {form.recipientName.trim()
                     ? `${form.recipientName.trim()} · ${form.recipientEmail.trim()}`
                     : form.recipientEmail.trim()}
                 </Summary>
-                <Summary label="Tone">{theme.name}</Summary>
-                <Summary label="Language">
+                <Summary label={dict.send.summaryTone}>{theme.name}</Summary>
+                <Summary label={dict.send.summaryLanguage}>
                   {LOCALES[form.locale]?.nativeName ?? form.locale}
                 </Summary>
-                <Summary label="Plan">
-                  {plan.name} · {plan.price} {plan.priceSuffix}
+                <Summary label={dict.send.summaryPlan}>
+                  {planCopy.name} · {planCopy.price} {planCopy.priceSuffix}
                 </Summary>
                 {form.plan === "DAILY" && (
-                  <Summary label="Arrives">
+                  <Summary label={dict.send.summaryArrives}>
                     {SEND_HOURS.find((h) => h.hour === form.sendHour)?.label}{" "}
                     · {form.sendTimezone.replace(/_/g, " ")}
                   </Summary>
                 )}
-                <Summary label="Total today" emphasis>
-                  {plan.price}
+                <Summary label={dict.send.summaryTotal} emphasis>
+                  {planCopy.price}
                 </Summary>
               </dl>
 
@@ -514,7 +505,7 @@ export function SendForm({
                   required
                 />
                 <span className="text-sm leading-relaxed text-muted-foreground">
-                  {WITHDRAWAL_CONSENT_TEXT}
+                  {dict.send.consent}
                 </span>
               </label>
 
@@ -534,19 +525,19 @@ export function SendForm({
         <div className="mt-9 flex items-center gap-3">
           {step > 0 && (
             <Button type="button" variant="ghost" onClick={goBack}>
-              <ArrowLeft className="size-4" /> Back
+              <ArrowLeft className="size-4" /> {dict.send.back}
             </Button>
           )}
 
           <div className="ml-auto">
-            {step < STEPS.length - 1 ? (
+            {step < steps.length - 1 ? (
               <Button
                 type="button"
                 size="lg"
                 onClick={goNext}
                 disabled={!canContinue}
               >
-                Continue <ArrowRight className="size-4" />
+                {dict.send.continueLabel} <ArrowRight className="size-4" />
               </Button>
             ) : (
               <Button
@@ -556,12 +547,11 @@ export function SendForm({
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" /> Opening
-                    checkout…
+                    <Loader2 className="size-4 animate-spin" /> {dict.send.opening}
                   </>
                 ) : (
                   <>
-                    <Lock className="size-4" /> Pay {plan.price}
+                    <Lock className="size-4" /> {fill(dict.send.payLabel, { price: planCopy.price })}
                   </>
                 )}
               </Button>
@@ -570,16 +560,14 @@ export function SendForm({
         </div>
 
         <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-          Payment is handled by Stripe — we never see your card details. One-off
-          messages are non-refundable once delivered. Daily plans can be
-          cancelled at any time.
+          {dict.send.smallPrint}
         </p>
       </form>
 
       {/* ------------------------------------------------- Live preview */}
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          What they'll receive
+          {dict.send.previewLabel}
         </p>
         <EmailPreview
           headline={theme.exampleHeadline}
@@ -589,10 +577,11 @@ export function SendForm({
           isDaily={form.plan === "DAILY"}
         />
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-          An example from the {theme.name.toLowerCase()} bank. The actual message
-          is chosen when it sends
-          {form.plan === "DAILY" ? ", and a different one goes out each day" : ""}
-          .
+          {fill(dict.send.previewNote, {
+            tone: theme.name.toLowerCase(),
+            daily:
+              form.plan === "DAILY" ? dict.send.previewNoteDailySuffix : "",
+          })}
         </p>
       </aside>
     </div>
@@ -602,15 +591,17 @@ export function SendForm({
 // ---------------------------------------------------------------------------
 
 function Stepper({
+  steps,
   current,
   onSelect,
 }: {
+  steps: readonly string[];
   current: number;
   onSelect: (index: number) => void;
 }) {
   return (
     <ol className="flex items-center gap-2 sm:gap-3">
-      {STEPS.map((label, index) => {
+      {steps.map((label, index) => {
         const done = index < current;
         const active = index === current;
         return (
@@ -639,7 +630,7 @@ function Stepper({
               </span>
               <span className="hidden sm:inline">{label}</span>
             </button>
-            {index < STEPS.length - 1 && (
+            {index < steps.length - 1 && (
               <span
                 aria-hidden
                 className={cn(

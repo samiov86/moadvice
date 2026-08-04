@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { ConsentBanner } from "@/components/analytics/consent-banner";
+import { dictionaries, localePath, type SiteLocale } from "@/lib/dictionary";
 
 /** Unset locally, so development never reports into the live property. */
 const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -13,7 +14,13 @@ const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
  * duplicating the analytics wiring across them is exactly how the two quietly
  * drift apart.
  */
-export function RootShell({ children }: { children: React.ReactNode }) {
+export function RootShell({
+  children,
+  locale = "en",
+}: {
+  children: React.ReactNode;
+  locale?: SiteLocale;
+}) {
   return (
     <>
       {children}
@@ -28,7 +35,10 @@ export function RootShell({ children }: { children: React.ReactNode }) {
       {gaMeasurementId && (
         <>
           <GoogleAnalytics measurementId={gaMeasurementId} />
-          <ConsentBanner />
+          <ConsentBanner
+            copy={dictionaries[locale].consent}
+            privacyHref={localePath(locale, "/privacy")}
+          />
         </>
       )}
     </>

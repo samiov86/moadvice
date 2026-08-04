@@ -68,7 +68,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${fontClassNames} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-background text-foreground">
-        <RootShell>{children}</RootShell>
+        <RootShell locale={locale as SiteLocale}>{children}</RootShell>
       </body>
     </html>
   );

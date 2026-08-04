@@ -11,6 +11,7 @@ import {
   type ConsentChoice,
 } from "@/lib/consent";
 import { cn } from "@/lib/utils";
+import type { Dictionary } from "@/lib/dictionary";
 
 /**
  * Cookie consent banner.
@@ -23,7 +24,13 @@ import { cn } from "@/lib/utils";
  * Renders nothing until mounted, since the answer lives in localStorage and
  * guessing during SSR would flash the banner at people who already decided.
  */
-export function ConsentBanner() {
+export function ConsentBanner({
+  copy,
+  privacyHref,
+}: {
+  copy: Dictionary["consent"];
+  privacyHref: string;
+}) {
   const [choice, setChoice] = React.useState<ConsentChoice | null>(null);
   const [mounted, setMounted] = React.useState(false);
 
@@ -46,7 +53,7 @@ export function ConsentBanner() {
   return (
     <div
       role="region"
-      aria-label="Cookie choices"
+      aria-label={copy.regionLabel}
       className={cn(
         "fixed inset-x-0 bottom-0 z-50 p-4 sm:p-6",
         "animate-in fade-in slide-in-from-bottom-4",
@@ -54,14 +61,12 @@ export function ConsentBanner() {
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-warm-lg sm:flex-row sm:items-center sm:gap-6 sm:p-6">
         <p className="flex-1 text-sm leading-relaxed text-muted-foreground">
-          We&apos;d like to use Google Analytics to understand how people find
-          this site. It sets cookies, so we only will if you say yes — decline
-          and nothing is stored on your device.{" "}
+          {copy.message}{" "}
           <Link
-            href="/privacy"
+            href={privacyHref}
             className="underline underline-offset-4 hover:text-foreground"
           >
-            How we handle data
+            {copy.howWeHandleData}
           </Link>
           .
         </p>
@@ -72,13 +77,13 @@ export function ConsentBanner() {
             onClick={() => decide("denied")}
             className="flex-1 sm:flex-none"
           >
-            Decline
+            {copy.decline}
           </Button>
           <Button
             onClick={() => decide("granted")}
             className="flex-1 sm:flex-none"
           >
-            Accept
+            {copy.accept}
           </Button>
         </div>
       </div>

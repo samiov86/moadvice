@@ -3,7 +3,12 @@ import Link from "next/link";
 import { Logo } from "@/components/site-header";
 import { ConsentReopenButton } from "@/components/analytics/consent-banner";
 import { siteConfig } from "@/lib/site";
-import { dictionaries, localePath, type SiteLocale } from "@/lib/dictionary";
+import {
+  dictionaries,
+  fill,
+  localePath,
+  type SiteLocale,
+} from "@/lib/dictionary";
 
 export function SiteFooter({ locale = "en" }: { locale?: SiteLocale }) {
   const dict = dictionaries[locale];
@@ -82,11 +87,11 @@ export function SiteFooter({ locale = "en" }: { locale?: SiteLocale }) {
               it satisfies both without a separate notice page.
             */}
             <p>
-              {dict.footer.tradingAs(
-                siteConfig.legal.name,
-                siteConfig.legal.nif,
-                siteConfig.legal.addressInline,
-              )}
+              {fill(dict.footer.tradingAs, {
+                name: siteConfig.legal.name,
+                nif: siteConfig.legal.nif,
+                address: siteConfig.legal.addressInline,
+              })}
             </p>
           </div>
           <p>

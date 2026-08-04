@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { TrackPurchase } from "@/components/track-purchase";
 import { prisma } from "@/lib/prisma";
 import { PLANS } from "@/lib/site";
+import { localePath, type SiteLocale } from "@/lib/dictionary";
 import { formatMoney } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -21,13 +22,19 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 interface SuccessPageProps {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ session_id?: string }>;
 }
 
 export default async function SendSuccessPage({
+  params,
   searchParams,
 }: SuccessPageProps) {
-  const { session_id: sessionId } = await searchParams;
+  const [{ locale: raw }, { session_id: sessionId }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const locale = raw as SiteLocale;
 
   const order = sessionId
     ? await prisma.order.findUnique({
@@ -44,7 +51,7 @@ export default async function SendSuccessPage({
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader locale={locale} />
 
       {order && (
         <TrackPurchase
@@ -136,7 +143,7 @@ export default async function SendSuccessPage({
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button asChild size="lg">
-              <Link href="/send">
+              <Link href={localePath(locale, "/send")}>
                 Send to someone else <ArrowRight className="size-4" />
               </Link>
             </Button>
@@ -154,7 +161,7 @@ export default async function SendSuccessPage({
         </div>
       </main>
 
-      <SiteFooter />
+      <SiteFooter locale={locale} />
     </>
   );
 }
