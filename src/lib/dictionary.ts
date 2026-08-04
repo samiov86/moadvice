@@ -121,6 +121,54 @@ export interface Dictionary {
     finalBody: string;
   };
 
+  messages: {
+    metaTitle: string;
+    /** Templated: {count}. */
+    metaDescription: string;
+    eyebrow: string;
+    /** Templated: {count}. */
+    heading: string;
+    /** Templated: {count}. */
+    intro: string;
+    freeToUse: string;
+    /** Templated: {count}. */
+    readAll: string;
+    forLifeBlurb: string;
+    forWorkBlurb: string;
+    /** Templated: {count}. */
+    countLabel: string;
+    occasionsHeading: string;
+    occasionsBody: string;
+    ctaHeading: string;
+    ctaBody: string;
+    backToAll: string;
+    fourThatFit: string;
+    fourThatFitBody: string;
+    otherOccasions: string;
+    categoryCtaHeading: string;
+    categoryCtaBody: string;
+    readOther: string;
+  };
+
+  received: {
+    metaTitle: string;
+    metaDescription: string;
+    heading: string;
+    intro: string;
+    cantTellHeading: string;
+    cantTellBody: string;
+    notScamHeading: string;
+    notScamBody: string;
+    stopHeading: string;
+    stopBody: string;
+    stopBody2: string;
+    optOutLink: string;
+    ctaHeading: string;
+    ctaBody: string;
+    ctaSend: string;
+    ctaRead: string;
+  };
+
   send: {
     metaTitle: string;
     metaDescription: string;
@@ -354,6 +402,62 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
       finalBody:
         "It costs a dollar to do something about it, and they will never know it was you.",
     },
+    messages: {
+      metaTitle: "Every message we send",
+      metaDescription:
+        "All {count} messages in the Mo Advice bank, free to read — hand-written words of encouragement and recognition for the people in your life and at work.",
+      eyebrow: "The message bank",
+      heading: "Every message we send, free to read",
+      intro:
+        "All {count} of them. Nothing is held back, nothing is generated on the fly, and no message has a name slotted into a template — each one is written and edited by hand to be true of someone you have never met.",
+      freeToUse:
+        "You are welcome to read them and say the words yourself. What we sell is the harder part: sending them anonymously, to someone else, every morning, without you having to find the nerve.",
+      readAll: "Read all {count}",
+      forLifeBlurb: "for the people in your life",
+      forWorkBlurb: "for the people you work with",
+      countLabel: "{count} messages",
+      occasionsHeading: "For a particular occasion",
+      occasionsBody: "What to say, and why the usual thing falls flat.",
+      ctaHeading: "Or have one sent for you, without your name on it",
+      ctaBody:
+        "A dollar sends one now. Five a month sends a different one every day, at a time you choose, for as long as you like.",
+      backToAll: "All messages",
+      fourThatFit: "Four that fit the occasion",
+      fourThatFitBody:
+        "Taken from the bank we actually send. Use the words yourself, or have one delivered anonymously.",
+      otherOccasions: "Other occasions",
+      categoryCtaHeading: "Saying it yourself is hard. That's rather the point of us.",
+      categoryCtaBody:
+        "We send one of these anonymously, so the person hears it without anyone having to be brave about it. A dollar for one, or five a month for one every day.",
+      readOther: "Read the other ones",
+    },
+
+    received: {
+      metaTitle: "Someone sent you an anonymous message",
+      metaDescription:
+        "You received a message from Mo Advice and don't know who sent it. Here's what happened, why we can't tell you, and how to stop them if you'd rather not receive any more.",
+      heading: "Someone wanted you to hear something good",
+      intro:
+        "If you've landed here, you probably received an email with some kind words in it and no name attached. Nothing is wrong. Someone who knows you paid to have it sent, and chose to stay anonymous.",
+      cantTellHeading: "We can't tell you who it was",
+      cantTellBody:
+        "Not won't — can't, as far as you're concerned. Anonymity is the entire product, and we don't reveal a sender on request, ever. If they want you to know, they'll tell you themselves.",
+      notScamHeading: "It isn't a scam, and there's nothing to click",
+      notScamBody:
+        "There's no account to make, no password, nothing to pay, and no link you need to press. We never ask you for anything. The only thing we hold is your email address — kept so we don't repeat a message you've already had, and never sold or shared.",
+      stopHeading: "If you'd rather not receive any more",
+      stopBody:
+        "Every message has a link at the bottom that stops them permanently — from this sender and from anyone else who tries. It takes one press and no explanation.",
+      stopBody2:
+        "If a message ever felt like anything other than kindness, tell us and we will stop it and look into who sent it. Anonymity here exists for kind words, and we remove people who abuse it.",
+      optOutLink: "use the opt-out page",
+      ctaHeading: "Someone thought of you. You might think of someone.",
+      ctaBody:
+        "No obligation whatsoever — you can close this tab and nothing happens. But if reading it made you think of a person who could use the same thing, that's how most of these get sent.",
+      ctaSend: "Send one to someone",
+      ctaRead: "Read the other messages",
+    },
+
     send: {
       metaTitle: "Send kind words",
       metaDescription:
@@ -599,6 +703,62 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
       finalBody:
         "Cuesta un dólar hacer algo al respecto, y nunca sabrá que fuiste tú.",
     },
+    messages: {
+      metaTitle: "Todos los mensajes que enviamos",
+      metaDescription:
+        "Los {count} mensajes del banco de Mo Advice, gratis de leer: palabras de ánimo y reconocimiento escritas a mano para la gente de tu vida y de tu trabajo.",
+      eyebrow: "El banco de mensajes",
+      heading: "Todos los mensajes que enviamos, gratis de leer",
+      intro:
+        "Los {count}. No guardamos ninguno, no se genera nada sobre la marcha y ninguno mete un nombre en una plantilla: cada uno está escrito y editado a mano para ser verdad de alguien a quien no conoces.",
+      freeToUse:
+        "Puedes leerlos y decir tú mismo las palabras. Lo que vendemos es la parte difícil: enviarlos de forma anónima, a otra persona, cada mañana, sin que tengas que reunir el valor.",
+      readAll: "Léelos los {count}",
+      forLifeBlurb: "para la gente de tu vida",
+      forWorkBlurb: "para la gente con la que trabajas",
+      countLabel: "{count} mensajes",
+      occasionsHeading: "Para una ocasión concreta",
+      occasionsBody: "Qué decir, y por qué lo de siempre se queda corto.",
+      ctaHeading: "O que lo enviemos por ti, sin tu nombre",
+      ctaBody:
+        "Un dólar envía uno ahora. Cinco al mes envían uno distinto cada día, a la hora que elijas, mientras tú quieras.",
+      backToAll: "Todos los mensajes",
+      fourThatFit: "Cuatro que encajan con la ocasión",
+      fourThatFitBody:
+        "Sacados del banco que enviamos de verdad. Usa tú las palabras, o haz que llegue uno de forma anónima.",
+      otherOccasions: "Otras ocasiones",
+      categoryCtaHeading: "Decirlo uno mismo cuesta. De eso vamos, precisamente.",
+      categoryCtaBody:
+        "Enviamos uno de estos de forma anónima, para que esa persona lo lea sin que nadie tenga que armarse de valor. Un dólar por uno, o cinco al mes por uno cada día.",
+      readOther: "Leer los otros",
+    },
+
+    received: {
+      metaTitle: "Alguien te ha enviado un mensaje anónimo",
+      metaDescription:
+        "Has recibido un mensaje de Mo Advice y no sabes quién lo envía. Aquí te contamos qué ha pasado, por qué no podemos decírtelo y cómo pararlo si prefieres no recibir más.",
+      heading: "Alguien quería que oyeras algo bueno",
+      intro:
+        "Si has llegado hasta aquí, probablemente hayas recibido un correo con unas buenas palabras y sin ningún nombre. No pasa nada raro. Alguien que te conoce pagó para que te lo enviaran y prefirió quedarse en el anonimato.",
+      cantTellHeading: "No podemos decirte quién fue",
+      cantTellBody:
+        "No es que no queramos: en lo que a ti respecta, no podemos. El anonimato es el producto entero y nunca revelamos quién envía, ni aunque se nos pida. Si quiere que lo sepas, te lo dirá esa persona.",
+      notScamHeading: "No es una estafa y no hay nada que pulsar",
+      notScamBody:
+        "No hay cuenta que crear, ni contraseña, ni nada que pagar, ni ningún enlace que tengas que abrir. Nunca te pedimos nada. Lo único que guardamos es tu dirección de correo, para no repetirte un mensaje que ya has recibido, y no la vendemos ni la compartimos.",
+      stopHeading: "Si prefieres no recibir más",
+      stopBody:
+        "Todos los mensajes llevan al final un enlace que los detiene para siempre, tanto de quien te los envía como de cualquier otra persona que lo intente. Es una sola pulsación y sin dar explicaciones.",
+      stopBody2:
+        "Si alguna vez un mensaje te ha parecido cualquier cosa menos amabilidad, dínoslo: lo detendremos y miraremos quién lo envió. Aquí el anonimato existe para las buenas palabras, y expulsamos a quien abusa de él.",
+      optOutLink: "usar la página de baja",
+      ctaHeading: "Alguien pensó en ti. Puede que tú pienses en alguien.",
+      ctaBody:
+        "Sin ninguna obligación: puedes cerrar esta pestaña y no pasa nada. Pero si leerlo te ha hecho pensar en alguien a quien le vendría bien lo mismo, así es como se envían casi todos.",
+      ctaSend: "Enviar uno a alguien",
+      ctaRead: "Leer los otros mensajes",
+    },
+
     send: {
       metaTitle: "Enviar buenas palabras",
       metaDescription:
@@ -706,6 +866,10 @@ const TRANSLATED_PATHS = new Set([
   "/terms",
   "/privacy",
   "/contact",
+  "/messages",
+  "/messages/personal",
+  "/messages/professional",
+  "/received",
 ]);
 
 export function isTranslated(path: string): boolean {

@@ -6,31 +6,46 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { MessageCard } from "@/components/message-card";
 import { Button } from "@/components/ui/button";
-import { MESSAGE_BANK } from "@/data/message-bank";
-import { CATEGORY_PAGES } from "@/lib/message-categories";
+import { localeContent } from "@/lib/locales";
+import { categoryPages } from "@/lib/message-categories";
 import { OCCASIONS } from "@/lib/occasions";
-import { absoluteUrl, siteConfig } from "@/lib/site";
+import { absoluteUrl } from "@/lib/site";
+import {
+  alternatesFor,
+  dictionaries,
+  fill,
+  localePath,
+  type SiteLocale,
+} from "@/lib/dictionary";
 import { breadcrumbSchema, jsonLd } from "@/lib/structured-data";
+
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
 
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
+}: PageProps): Promise<Metadata> {
   const { locale } = await params;
+  const dict = dictionaries[locale as SiteLocale];
+  const count = String(localeContent(locale).messages.length);
   return {
-    // Spanish renders English here until it's translated, so keep it out of
-    // the index rather than let a Spanish URL rank on English text.
-    ...(locale === "es" ? { robots: { index: false, follow: true } } : {}),
-    title: `Every message we send`,
-    description: `All ${MESSAGE_BANK.length} messages in the ${siteConfig.name} bank, free to read — hand-written words of encouragement and recognition for the people in your life and at work.`,
-    alternates: { canonical: `/${locale}/messages` },
+    title: dict.messages.metaTitle,
+    description: fill(dict.messages.metaDescription, { count }),
+    alternates: alternatesFor(locale as SiteLocale, "/messages"),
   };
 }
 
-export default function MessagesIndexPage() {
+export default async function MessagesIndexPage({ params }: PageProps) {
+  const { locale: raw } = await params;
+  const locale = raw as SiteLocale;
+  const dict = dictionaries[locale];
+  const path = (p: string) => localePath(locale, p);
+  const count = String(localeContent(locale).messages.length);
+  const pages = categoryPages(locale);
+
   // A few from each bank as a taste; the category pages carry the full set.
-  const preview = CATEGORY_PAGES.map((page) => ({
+  const preview = pages.map((page) => ({
     page,
     sample: page.messages.slice(0, 3),
   }));
@@ -39,18 +54,21 @@ export default function MessagesIndexPage() {
     {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
-      "@id": absoluteUrl("/messages#collection"),
-      name: "Every message we send",
-      description: `All ${MESSAGE_BANK.length} messages in the ${siteConfig.name} bank, free to read.`,
-      url: absoluteUrl("/messages"),
+      "@id": absoluteUrl(`/${locale}/messages#collection`),
+      name: dict.messages.metaTitle,
+      description: fill(dict.messages.metaDescription, { count }),
+      url: absoluteUrl(`/${locale}/messages`),
       isPartOf: { "@id": absoluteUrl("/#website") },
-      hasPart: CATEGORY_PAGES.map((page) => ({
+      hasPart: pages.map((page) => ({
         "@type": "CollectionPage",
         name: page.title,
-        url: absoluteUrl(`/messages/${page.slug}`),
+        url: absoluteUrl(`/${locale}/messages/${page.slug}`),
       })),
     },
-    breadcrumbSchema([{ name: "Home", path: "/" }, { name: "Messages" }]),
+    breadcrumbSchema([
+      { name: "Home", path: `/${locale}` },
+      { name: dict.nav.messages },
+    ]),
   ];
 
   return (
@@ -63,27 +81,22 @@ export default function MessagesIndexPage() {
         />
       ))}
 
-      <SiteHeader />
+      <SiteHeader locale={locale} />
 
       <main className="flex-1">
         <section className="bg-warm-wash">
           <div className="mx-auto w-full max-w-3xl px-5 py-16 sm:px-8 lg:py-20">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              The message bank
+              {dict.messages.eyebrow}
             </p>
             <h1 className="mt-4 font-display text-4xl leading-tight text-balance">
-              Every message we send, free to read
+              {dict.messages.heading}
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              All {MESSAGE_BANK.length} of them. Nothing is held back, nothing
-              is generated on the fly, and no message has a name slotted into a
-              template — each one is written and edited by hand to be true of
-              someone you have never met.
+              {fill(dict.messages.intro, { count })}
             </p>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-              You are welcome to read them and say the words yourself. What we
-              sell is the harder part: sending them anonymously, to someone
-              else, every morning, without you having to find the nerve.
+              {dict.messages.freeToUse}
             </p>
           </div>
         </section>
@@ -97,15 +110,20 @@ export default function MessagesIndexPage() {
                     {page.name}
                   </h2>
                   <p className="mt-2 max-w-xl text-muted-foreground">
-                    {page.messages.length} messages ·{" "}
+                    {fill(dict.messages.countLabel, {
+                      count: String(page.messages.length),
+                    })}{" "}
+                    ·{" "}
                     {page.slug === "personal"
-                      ? "for the people in your life"
-                      : "for the people you work with"}
+                      ? dict.messages.forLifeBlurb
+                      : dict.messages.forWorkBlurb}
                   </p>
                 </div>
                 <Button asChild variant="outline">
-                  <Link href={`/messages/${page.slug}`}>
-                    Read all {page.messages.length}{" "}
+                  <Link href={path(`/messages/${page.slug}`)}>
+                    {fill(dict.messages.readAll, {
+                      count: String(page.messages.length),
+                    })}{" "}
                     <ArrowRight className="size-4" />
                   </Link>
                 </Button>
@@ -119,50 +137,56 @@ export default function MessagesIndexPage() {
             </section>
           ))}
 
-          <section className="mb-16 border-t border-border pt-12">
-            <h2 className="font-display text-2xl leading-tight">
-              For a particular occasion
-            </h2>
-            <p className="mt-2 max-w-2xl text-muted-foreground">
-              What to say, and why the usual thing falls flat.
-            </p>
-            <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-              {OCCASIONS.map((occasion) => (
-                <li key={occasion.slug}>
-                  <Link
-                    href={`/for/${occasion.slug}`}
-                    className="block rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
-                  >
-                    <span className="font-display text-lg leading-snug">
-                      {occasion.heading}
-                    </span>
-                    <span className="mt-1 block text-sm text-muted-foreground">
-                      {occasion.when}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
+          {/*
+            Occasion guides are English-only — they target US observances, and a
+            Spanish edition needs its own dates rather than a translation of
+            these. Shown only in the tree they belong to.
+          */}
+          {locale === "en" && (
+            <section className="mb-16 border-t border-border pt-12">
+              <h2 className="font-display text-2xl leading-tight">
+                {dict.messages.occasionsHeading}
+              </h2>
+              <p className="mt-2 max-w-2xl text-muted-foreground">
+                {dict.messages.occasionsBody}
+              </p>
+              <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+                {OCCASIONS.map((occasion) => (
+                  <li key={occasion.slug}>
+                    <Link
+                      href={path(`/for/${occasion.slug}`)}
+                      className="block rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
+                    >
+                      <span className="font-display text-lg leading-snug">
+                        {occasion.heading}
+                      </span>
+                      <span className="mt-1 block text-sm text-muted-foreground">
+                        {occasion.when}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <div className="mt-4 rounded-2xl border border-border bg-secondary/40 p-8 text-center">
             <h2 className="font-display text-2xl leading-snug text-balance">
-              Or have one sent for you, without your name on it
+              {dict.messages.ctaHeading}
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-[15px] leading-relaxed text-muted-foreground">
-              A dollar sends one now. Five a month sends a different one every
-              day, at a time you choose, for as long as you like.
+              {dict.messages.ctaBody}
             </p>
             <Button asChild size="lg" className="mt-6">
-              <Link href="/send">
-                Send kind words <ArrowRight className="size-4" />
+              <Link href={path("/send")}>
+                {dict.nav.sendCta} <ArrowRight className="size-4" />
               </Link>
             </Button>
           </div>
         </div>
       </main>
 
-      <SiteFooter />
+      <SiteFooter locale={locale} />
     </>
   );
 }

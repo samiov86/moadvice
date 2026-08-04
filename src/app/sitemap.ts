@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { absoluteUrl, siteConfig } from "@/lib/site";
-import { CATEGORY_PAGES } from "@/lib/message-categories";
+import { CATEGORY_SLUGS } from "@/lib/message-categories";
 import { OCCASIONS } from "@/lib/occasions";
 
 /**
@@ -26,6 +26,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/terms", priority: 0.3, lastMod: legalUpdated },
     { path: "/privacy", priority: 0.3, lastMod: legalUpdated },
     { path: "/contact", priority: 0.4 },
+    { path: "/messages", priority: 0.8 },
+    ...CATEGORY_SLUGS.map((slug) => ({
+      path: `/messages/${slug}`,
+      priority: 0.8,
+    })),
+    { path: "/received", priority: 0.5 },
   ];
 
   const bilingualEntries = bilingual.flatMap(({ path, priority, lastMod }) =>
@@ -45,28 +51,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   );
 
-  /** English-only for now: the Spanish versions are noindex until translated. */
+  /**
+   * English-only: the occasion guides target US observances, and a Spanish
+   * edition needs its own dates rather than a translation of these.
+   */
   const englishOnly: MetadataRoute.Sitemap = [
-    {
-      url: absoluteUrl("/en/messages"),
-      priority: 0.8,
-      changeFrequency: "monthly",
-    },
-    ...CATEGORY_PAGES.map((page) => ({
-      url: absoluteUrl(`/en/messages/${page.slug}`),
-      priority: 0.8,
-      changeFrequency: "monthly" as const,
-    })),
     ...OCCASIONS.map((occasion) => ({
       url: absoluteUrl(`/en/for/${occasion.slug}`),
       priority: 0.7,
       changeFrequency: "yearly" as const,
     })),
-    {
-      url: absoluteUrl("/en/received"),
-      priority: 0.5,
-      changeFrequency: "yearly",
-    },
   ];
 
   return [...bilingualEntries, ...englishOnly];

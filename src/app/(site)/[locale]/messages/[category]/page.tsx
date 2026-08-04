@@ -7,8 +7,18 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { MessageCard } from "@/components/message-card";
 import { Button } from "@/components/ui/button";
-import { CATEGORY_PAGES, getCategoryPage } from "@/lib/message-categories";
+import {
+  CATEGORY_SLUGS,
+  categoryPages,
+  getCategoryPage,
+} from "@/lib/message-categories";
 import { absoluteUrl, siteConfig } from "@/lib/site";
+import {
+  alternatesFor,
+  dictionaries,
+  localePath,
+  type SiteLocale,
+} from "@/lib/dictionary";
 import { breadcrumbSchema, jsonLd } from "@/lib/structured-data";
 
 interface CategoryPageProps {
@@ -17,29 +27,29 @@ interface CategoryPageProps {
 
 /** Both categories are known at build time, so these render statically. */
 export function generateStaticParams() {
-  return CATEGORY_PAGES.map((page) => ({ category: page.slug }));
+  return CATEGORY_SLUGS.map((category) => ({ category }));
 }
 
 export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
   const { locale, category } = await params;
-  const page = getCategoryPage(category);
+  const page = getCategoryPage(locale as SiteLocale, category);
   if (!page) return {};
 
   return {
-    // Spanish renders English here until it's translated, so keep it out of
-    // the index rather than let a Spanish URL rank on English text.
-    ...(locale === "es" ? { robots: { index: false, follow: true } } : {}),
     // Absolute, so the "· Mo Advice" suffix doesn't push these past the ~60
     // characters Google shows. The phrasing is the part worth keeping whole.
     title: { absolute: page.title },
     description: page.metaDescription,
-    alternates: { canonical: `/${locale}/messages/${page.slug}` },
+    alternates: alternatesFor(
+      locale as SiteLocale,
+      `/messages/${page.slug}`,
+    ),
     openGraph: {
       title: `${page.title} · ${siteConfig.name}`,
       description: page.metaDescription,
-      url: absoluteUrl(`/messages/${page.slug}`),
+      url: absoluteUrl(`/${locale}/messages/${page.slug}`),
     },
   };
 }
@@ -47,11 +57,14 @@ export async function generateMetadata({
 export default async function MessageCategoryPage({
   params,
 }: CategoryPageProps) {
-  const { category } = await params;
-  const page = getCategoryPage(category);
+  const { locale: raw, category } = await params;
+  const locale = raw as SiteLocale;
+  const dict = dictionaries[locale];
+  const page = getCategoryPage(locale, category);
   if (!page) notFound();
 
-  const other = CATEGORY_PAGES.find((p) => p.slug !== page.slug)!;
+  const other = categoryPages(locale).find((p) => p.slug !== page.slug)!;
+  const path = (p: string) => localePath(locale, p);
 
   /**
    * ItemList describing exactly what's on the page and nothing more. Search
@@ -61,10 +74,10 @@ export default async function MessageCategoryPage({
   const schema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "@id": absoluteUrl(`/messages/${page.slug}#collection`),
+    "@id": absoluteUrl(`/${locale}/messages/${page.slug}#collection`),
     name: page.title,
     description: page.metaDescription,
-    url: absoluteUrl(`/messages/${page.slug}`),
+    url: absoluteUrl(`/${locale}/messages/${page.slug}`),
     isPartOf: { "@id": absoluteUrl("/#website") },
     mainEntity: {
       "@type": "ItemList",
@@ -73,14 +86,14 @@ export default async function MessageCategoryPage({
         "@type": "ListItem",
         position: index + 1,
         name: message.headline,
-        url: absoluteUrl(`/messages/${page.slug}#${message.slug}`),
+        url: absoluteUrl(`/${locale}/messages/${page.slug}#${message.slug}`),
       })),
     },
   };
 
   const breadcrumbs = breadcrumbSchema([
-    { name: "Home", path: "/" },
-    { name: "Messages", path: "/messages" },
+    { name: "Home", path: `/${locale}` },
+    { name: dict.nav.messages, path: `/${locale}/messages` },
     { name: page.name },
   ]);
 
@@ -94,16 +107,16 @@ export default async function MessageCategoryPage({
         />
       ))}
 
-      <SiteHeader />
+      <SiteHeader locale={locale} />
 
       <main className="flex-1">
         <section className="bg-warm-wash">
           <div className="mx-auto w-full max-w-3xl px-5 py-16 sm:px-8 lg:py-20">
             <Link
-              href="/messages"
+              href={path("/messages")}
               className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              <ArrowLeft className="size-4" /> All messages
+              <ArrowLeft className="size-4" /> {dict.messages.backToAll}
             </Link>
 
             <h1 className="mt-6 font-display text-4xl leading-tight text-balance">
@@ -127,22 +140,20 @@ export default async function MessageCategoryPage({
 
           <div className="mt-14 rounded-2xl border border-border bg-secondary/40 p-8 text-center">
             <h2 className="font-display text-2xl leading-snug text-balance">
-              Saying it yourself is hard. That&apos;s rather the point of us.
+              {dict.messages.categoryCtaHeading}
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-[15px] leading-relaxed text-muted-foreground">
-              We send one of these anonymously, so the person hears it without
-              anyone having to be brave about it. A dollar for one, or five a
-              month for one every day.
+              {dict.messages.categoryCtaBody}
             </p>
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
               <Button asChild size="lg">
-                <Link href="/send">
-                  Send kind words <ArrowRight className="size-4" />
+                <Link href={path("/send")}>
+                  {dict.nav.sendCta} <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href={`/messages/${other.slug}`}>
-                  Read the {other.name.toLowerCase()} ones
+                <Link href={path(`/messages/${other.slug}`)}>
+                  {dict.messages.readOther} — {other.name.toLowerCase()}
                 </Link>
               </Button>
             </div>
@@ -150,7 +161,7 @@ export default async function MessageCategoryPage({
         </div>
       </main>
 
-      <SiteFooter />
+      <SiteFooter locale={locale} />
     </>
   );
 }
