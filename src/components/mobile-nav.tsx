@@ -21,7 +21,19 @@ export interface NavLink {
  * It still does the things a modal would — Escape closes, the trigger reports
  * its state, focus moves into the panel, and the page behind it can't scroll.
  */
-export function MobileNav({ links }: { links: NavLink[] }) {
+export function MobileNav({
+  links,
+  sendHref,
+  sendLabel,
+  openLabel,
+  closeLabel,
+}: {
+  links: NavLink[];
+  sendHref: string;
+  sendLabel: string;
+  openLabel: string;
+  closeLabel: string;
+}) {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname();
   const panelRef = React.useRef<HTMLDivElement>(null);
@@ -58,7 +70,7 @@ export function MobileNav({ links }: { links: NavLink[] }) {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-controls="mobile-nav-panel"
-        aria-label={open ? "Close menu" : "Open menu"}
+        aria-label={open ? closeLabel : openLabel}
         className="grid size-10 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary"
       >
         {open ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -96,8 +108,8 @@ export function MobileNav({ links }: { links: NavLink[] }) {
           </ul>
 
           <Button asChild size="lg" className="mt-5 w-full">
-            <Link href="/send" onClick={() => setOpen(false)}>
-              Send kind words
+            <Link href={sendHref} onClick={() => setOpen(false)}>
+              {sendLabel}
             </Link>
           </Button>
         </nav>

@@ -3,45 +3,48 @@ import Link from "next/link";
 import { Logo } from "@/components/site-header";
 import { ConsentReopenButton } from "@/components/analytics/consent-banner";
 import { siteConfig } from "@/lib/site";
+import { dictionaries, localePath, type SiteLocale } from "@/lib/dictionary";
 
-const columns = [
-  {
-    title: "Product",
-    links: [
-      { label: "Send kind words", href: "/send" },
-      { label: "How it works", href: "/#how" },
-      { label: "Read the messages", href: "/messages" },
-      { label: "Pricing", href: "/#pricing" },
-      { label: "Dashboard", href: "/dashboard" },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Refunds", href: "/terms#refunds" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "Contact", href: "/contact" },
-      { label: "Stop receiving messages", href: "/unsubscribe" },
-    ],
-  },
-];
+export function SiteFooter({ locale = "en" }: { locale?: SiteLocale }) {
+  const dict = dictionaries[locale];
+  const path = (p: string) => localePath(locale, p);
 
-export function SiteFooter() {
+  const columns = [
+    {
+      title: dict.footer.product,
+      links: [
+        { label: dict.footer.sendKindWords, href: path("/send") },
+        { label: dict.nav.howItWorks, href: path("/#how") },
+        { label: dict.footer.readMessages, href: path("/messages") },
+        { label: dict.nav.pricing, href: path("/#pricing") },
+        { label: dict.nav.dashboard, href: "/dashboard" },
+      ],
+    },
+    {
+      title: dict.footer.legal,
+      links: [
+        { label: dict.footer.terms, href: path("/terms") },
+        { label: dict.footer.privacy, href: path("/privacy") },
+        { label: dict.footer.refunds, href: `${path("/terms")}#refunds` },
+      ],
+    },
+    {
+      title: dict.footer.company,
+      links: [
+        { label: dict.footer.contact, href: path("/contact") },
+        { label: dict.footer.stopReceiving, href: "/unsubscribe" },
+      ],
+    },
+  ];
+
   return (
     <footer className="mt-auto border-t border-border bg-secondary/40">
       <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-8">
         <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div className="max-w-xs">
-            <Logo />
+            <Logo locale={locale} />
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              {siteConfig.strapline}. Sent by email, delivered anonymously, and
-              read by someone who probably needed it today.
+              {dict.footer.blurb}
             </p>
           </div>
 
@@ -79,12 +82,16 @@ export function SiteFooter() {
               it satisfies both without a separate notice page.
             */}
             <p>
-              {siteConfig.name} is a trading name of {siteConfig.legal.name},
-              NIF {siteConfig.legal.nif}, {siteConfig.legal.addressInline}.
+              {dict.footer.tradingAs(
+                siteConfig.legal.name,
+                siteConfig.legal.nif,
+                siteConfig.legal.addressInline,
+              )}
             </p>
           </div>
           <p>
-            <ConsentReopenButton /> · Questions?{" "}
+            <ConsentReopenButton label={dict.footer.cookieChoices} /> ·{" "}
+            {dict.footer.questions}{" "}
             <a
               href={`mailto:${siteConfig.supportEmail}`}
               className="underline underline-offset-4 hover:text-foreground"

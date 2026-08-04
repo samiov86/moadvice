@@ -87,14 +87,14 @@ export function ConsentBanner() {
 }
 
 /** Footer control, so withdrawing is as easy as consenting was. */
-export function ConsentReopenButton() {
+export function ConsentReopenButton({ label }: { label: string }) {
   return (
     <button
       type="button"
       onClick={() => window.dispatchEvent(new Event(REOPEN_CONSENT_EVENT))}
       className="text-foreground/80 transition-colors hover:text-primary"
     >
-      Cookie choices
+      {label}
     </button>
   );
 }

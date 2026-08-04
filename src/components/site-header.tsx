@@ -5,28 +5,37 @@ import quokkaMark from "../../public/quokka.png";
 import { Button } from "@/components/ui/button";
 import { MobileNav, type NavLink } from "@/components/mobile-nav";
 import { siteConfig } from "@/lib/site";
+import { dictionaries, localePath, type SiteLocale } from "@/lib/dictionary";
 import { cn } from "@/lib/utils";
 
 /**
- * Single source for the header links, shared by both breakpoints.
+ * Header links for a locale.
  *
- * No separate "Sign in" entry: the header is a static component rendered on
- * cached pages, so it can't know whether you're signed in — and showing "Sign
- * in" to someone who already is looked broken on the dashboard. "Dashboard" is
- * the one door instead; it redirects to /signin when there's no session, which
- * is the same journey with one less wrong-looking link.
+ * No separate "Sign in" entry: the header is static and rendered on cached
+ * pages, so it can't know whether you're signed in — and showing "Sign in" to
+ * someone who already is looked broken on the dashboard. "Dashboard" is the one
+ * door instead, and it redirects to /signin without a session.
  */
-const NAV_LINKS: NavLink[] = [
-  { href: "/#how", label: "How it works" },
-  { href: "/messages", label: "Messages" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: "/dashboard", label: "Dashboard" },
-];
+function navLinks(locale: SiteLocale): NavLink[] {
+  const dict = dictionaries[locale];
+  return [
+    { href: localePath(locale, "/#how"), label: dict.nav.howItWorks },
+    { href: localePath(locale, "/messages"), label: dict.nav.messages },
+    { href: localePath(locale, "/#pricing"), label: dict.nav.pricing },
+    { href: "/dashboard", label: dict.nav.dashboard },
+  ];
+}
 
-export function Logo({ className }: { className?: string }) {
+export function Logo({
+  className,
+  locale = "en",
+}: {
+  className?: string;
+  locale?: SiteLocale;
+}) {
   return (
     <Link
-      href="/"
+      href={localePath(locale, "/")}
       className={cn("group inline-flex items-center gap-2.5", className)}
       aria-label={`${siteConfig.name} home`}
     >
@@ -50,14 +59,17 @@ export function Logo({ className }: { className?: string }) {
   );
 }
 
-export function SiteHeader() {
+export function SiteHeader({ locale = "en" }: { locale?: SiteLocale }) {
+  const dict = dictionaries[locale];
+  const links = navLinks(locale);
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
-        <Logo />
+        <Logo locale={locale} />
 
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          {NAV_LINKS.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -70,9 +82,15 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-1.5 sm:gap-2">
           <Button asChild size="sm">
-            <Link href="/send">Send kind words</Link>
+            <Link href={localePath(locale, "/send")}>{dict.nav.sendCta}</Link>
           </Button>
-          <MobileNav links={NAV_LINKS} />
+          <MobileNav
+            links={links}
+            sendHref={localePath(locale, "/send")}
+            sendLabel={dict.nav.sendCta}
+            openLabel={dict.nav.openMenu}
+            closeLabel={dict.nav.closeMenu}
+          />
         </div>
       </div>
     </header>
