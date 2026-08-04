@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import type { SiteLocale } from "@/lib/dictionary";
 import { cn } from "@/lib/utils";
 
 export interface NavLink {
@@ -22,12 +24,14 @@ export interface NavLink {
  * its state, focus moves into the panel, and the page behind it can't scroll.
  */
 export function MobileNav({
+  locale,
   links,
   sendHref,
   sendLabel,
   openLabel,
   closeLabel,
 }: {
+  locale: SiteLocale;
   links: NavLink[];
   sendHref: string;
   sendLabel: string;
@@ -112,6 +116,10 @@ export function MobileNav({
               {sendLabel}
             </Link>
           </Button>
+
+          <div className="mt-5 border-t border-border pt-4">
+            <LanguageSwitcher locale={locale} />
+          </div>
         </nav>
       </div>
     </div>

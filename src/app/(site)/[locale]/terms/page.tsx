@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { LegalDocument } from "@/components/legal-page";
 import { siteConfig } from "@/lib/site";
-import { fill, type SiteLocale } from "@/lib/dictionary";
+import { alternatesFor, fill, type SiteLocale } from "@/lib/dictionary";
 import { legalCopy } from "@/lib/legal-copy";
 
 interface PageProps {
@@ -17,7 +17,7 @@ export async function generateMetadata({
   return {
     title: page.title,
     description: fill(page.metaDescription, { domain: siteConfig.domain }),
-    alternates: { canonical: `/${locale}/terms` },
+    alternates: alternatesFor(locale as SiteLocale, "/terms"),
   };
 }
 

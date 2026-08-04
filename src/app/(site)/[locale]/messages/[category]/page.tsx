@@ -28,6 +28,9 @@ export async function generateMetadata({
   if (!page) return {};
 
   return {
+    // Spanish renders English here until it's translated, so keep it out of
+    // the index rather than let a Spanish URL rank on English text.
+    ...(locale === "es" ? { robots: { index: false, follow: true } } : {}),
     // Absolute, so the "· Mo Advice" suffix doesn't push these past the ~60
     // characters Google shows. The phrasing is the part worth keeping whole.
     title: { absolute: page.title },

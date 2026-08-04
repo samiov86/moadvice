@@ -692,6 +692,49 @@ export function getDictionary(locale: SiteLocale): Dictionary {
 }
 
 /**
+ * Paths that genuinely exist in every language.
+ *
+ * hreflang is a per-URL claim, not a site-wide one: pointing it at a Spanish
+ * URL that renders English tells search engines a translation exists when it
+ * doesn't, which is worse than staying quiet. Add a path here the moment it is
+ * actually translated — and not before.
+ */
+const TRANSLATED_PATHS = new Set([
+  "/",
+  "/send",
+  "/send/success",
+  "/terms",
+  "/privacy",
+  "/contact",
+]);
+
+export function isTranslated(path: string): boolean {
+  return TRANSLATED_PATHS.has(path);
+}
+
+/**
+ * Canonical plus hreflang for a page, given the path without a locale prefix.
+ *
+ * Untranslated pages get a canonical and nothing else, so each language's
+ * version stands alone rather than claiming a counterpart it doesn't have.
+ */
+export function alternatesFor(locale: SiteLocale, path: string) {
+  const canonical = localePath(locale, path);
+  if (!isTranslated(path)) return { canonical };
+
+  return {
+    canonical,
+    languages: {
+      en: localePath("en", path),
+      es: localePath("es", path),
+      // Which version an unmatched language gets. English, because that's
+      // where the content and the audience currently are.
+      "x-default": localePath("en", path),
+    },
+  };
+}
+
+/**
  * Fills {placeholders} in a dictionary string.
  *
  * The send dictionary is handed to a client component, so it has to be plain

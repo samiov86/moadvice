@@ -4,6 +4,7 @@ import Image from "next/image";
 import quokkaMark from "../../public/quokka.png";
 import { Button } from "@/components/ui/button";
 import { MobileNav, type NavLink } from "@/components/mobile-nav";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { siteConfig } from "@/lib/site";
 import { dictionaries, localePath, type SiteLocale } from "@/lib/dictionary";
 import { cn } from "@/lib/utils";
@@ -80,11 +81,13 @@ export function SiteHeader({ locale = "en" }: { locale?: SiteLocale }) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <LanguageSwitcher locale={locale} className="hidden md:inline-flex" />
           <Button asChild size="sm">
             <Link href={localePath(locale, "/send")}>{dict.nav.sendCta}</Link>
           </Button>
           <MobileNav
+            locale={locale}
             links={links}
             sendHref={localePath(locale, "/send")}
             sendLabel={dict.nav.sendCta}

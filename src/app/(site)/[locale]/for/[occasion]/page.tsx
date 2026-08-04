@@ -27,6 +27,9 @@ export async function generateMetadata({
   if (!occasion) return {};
 
   return {
+    // Spanish renders English here until it's translated, so keep it out of
+    // the index rather than let a Spanish URL rank on English text.
+    ...(locale === "es" ? { robots: { index: false, follow: true } } : {}),
     title: { absolute: `${occasion.title} · Mo Advice` },
     description: occasion.metaDescription,
     alternates: { canonical: `/${locale}/for/${occasion.slug}` },

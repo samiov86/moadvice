@@ -19,6 +19,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   return {
+    // Spanish renders English here until it's translated, so keep it out of
+    // the index rather than let a Spanish URL rank on English text.
+    ...(locale === "es" ? { robots: { index: false, follow: true } } : {}),
     title: `Every message we send`,
     description: `All ${MESSAGE_BANK.length} messages in the ${siteConfig.name} bank, free to read — hand-written words of encouragement and recognition for the people in your life and at work.`,
     alternates: { canonical: `/${locale}/messages` },

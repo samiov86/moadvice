@@ -14,6 +14,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   return {
+    // Spanish renders English here until it's translated, so keep it out of
+    // the index rather than let a Spanish URL rank on English text.
+    ...(locale === "es" ? { robots: { index: false, follow: true } } : {}),
     title: "Someone sent you an anonymous message",
     description:
       "You received a message from Mo Advice and don't know who sent it. Here's what happened, why we can't tell you, and how to stop them if you'd rather not receive any more.",

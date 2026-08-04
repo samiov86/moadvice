@@ -8,6 +8,7 @@ import type { PlanId } from "@/lib/site";
 import {
   dictionaries,
   sendDictionary,
+  alternatesFor,
   type SiteLocale,
 } from "@/lib/dictionary";
 
@@ -21,7 +22,7 @@ export async function generateMetadata({
   return {
     title: { absolute: `${dict.send.metaTitle} · Mo Advice` },
     description: dict.send.metaDescription,
-    alternates: { canonical: `/${locale}/send` },
+    alternates: alternatesFor(locale as SiteLocale, "/send"),
   };
 }
 

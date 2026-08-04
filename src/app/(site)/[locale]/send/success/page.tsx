@@ -10,13 +10,25 @@ import { Badge } from "@/components/ui/badge";
 import { TrackPurchase } from "@/components/track-purchase";
 import { prisma } from "@/lib/prisma";
 import { PLANS } from "@/lib/site";
-import { localePath, type SiteLocale } from "@/lib/dictionary";
+import {
+  alternatesFor,
+  localePath,
+  type SiteLocale,
+} from "@/lib/dictionary";
 import { formatMoney } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Sent",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: "Sent",
+    robots: { index: false, follow: false },
+    alternates: alternatesFor(locale as SiteLocale, "/send/success"),
+  };
+}
 
 /** Always fresh — the webhook may land moments after the redirect. */
 export const dynamic = "force-dynamic";

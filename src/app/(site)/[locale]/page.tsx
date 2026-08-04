@@ -23,6 +23,7 @@ import {
   dictionaries,
   fill,
   localePath,
+  alternatesFor,
   type SiteLocale,
 } from "@/lib/dictionary";
 import {
@@ -45,7 +46,7 @@ export async function generateMetadata({
   return {
     title: { absolute: dict.home.metaTitle },
     description: dict.home.metaDescription,
-    alternates: { canonical: `/${locale}` },
+    alternates: alternatesFor(locale as SiteLocale, "/"),
   };
 }
 
