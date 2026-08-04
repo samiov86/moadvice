@@ -70,6 +70,9 @@ export interface Dictionary {
     }
   >;
 
+  /** The trader's country, named in this language. */
+  countryName: string;
+
   consent: {
     message: string;
     howWeHandleData: string;
@@ -246,6 +249,7 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
         ],
       },
     },
+    countryName: "Spain",
     consent: {
       message:
         "We'd like to use Google Analytics to understand how people find this site. It sets cookies, so we only will if you say yes — decline and nothing is stored on your device.",
@@ -490,6 +494,7 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
         ],
       },
     },
+    countryName: "España",
     consent: {
       message:
         "Nos gustaría usar Google Analytics para entender cómo llega la gente a este sitio. Usa cookies, así que solo lo haremos si nos dices que sí: si rechazas, no se guarda nada en tu dispositivo.",

@@ -25,6 +25,12 @@ export const siteConfig = {
     addressLines: ["c/ Madrazo 46", "08006 Barcelona", "Spain"],
     /** Single line, for the footer and email footers. */
     addressInline: "c/ Madrazo 46, 08006 Barcelona, Spain",
+    /**
+     * Without the country, so each locale can append its own name for it —
+     * "Spain" on an otherwise Spanish page reads like an oversight, because
+     * it is one.
+     */
+    addressInlineNoCountry: "c/ Madrazo 46, 08006 Barcelona",
     country: "Spain",
     governingLaw: "Spanish law",
   },

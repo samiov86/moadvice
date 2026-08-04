@@ -90,7 +90,7 @@ export function SiteFooter({ locale = "en" }: { locale?: SiteLocale }) {
               {fill(dict.footer.tradingAs, {
                 name: siteConfig.legal.name,
                 nif: siteConfig.legal.nif,
-                address: siteConfig.legal.addressInline,
+                address: `${siteConfig.legal.addressInlineNoCountry}, ${dict.countryName}`,
               })}
             </p>
           </div>
