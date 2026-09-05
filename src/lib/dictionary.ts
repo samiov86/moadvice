@@ -169,6 +169,13 @@ export interface Dictionary {
     ctaRead: string;
   };
 
+  closed: {
+    heading: string;
+    body: string;
+    recipientsNote: string;
+    back: string;
+  };
+
   send: {
     metaTitle: string;
     metaDescription: string;
@@ -458,6 +465,13 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
       ctaRead: "Read the other messages",
     },
 
+    closed: {
+      heading: "Mo Advice has closed",
+      body: "We've stopped taking new orders. Nothing has been charged, and any plan that was running has been cancelled — you won't be billed again.",
+      recipientsNote:
+        "If you were receiving messages, they have stopped. Thank you for reading them.",
+      back: "Back to the homepage",
+    },
     send: {
       metaTitle: "Send kind words",
       metaDescription:
@@ -759,6 +773,13 @@ export const dictionaries: Record<SiteLocale, Dictionary> = {
       ctaRead: "Leer los otros mensajes",
     },
 
+    closed: {
+      heading: "Mo Advice ha cerrado",
+      body: "Hemos dejado de aceptar pedidos nuevos. No se ha cobrado nada, y cualquier plan que estuviera activo se ha cancelado: no se te volverá a cobrar.",
+      recipientsNote:
+        "Si estabas recibiendo mensajes, han dejado de enviarse. Gracias por leerlos.",
+      back: "Volver al inicio",
+    },
     send: {
       metaTitle: "Enviar buenas palabras",
       metaDescription:

@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { SendForm } from "@/components/send/send-form";
 import { auth } from "@/lib/auth";
-import type { PlanId } from "@/lib/site";
+import { SERVICE_CLOSED, type PlanId } from "@/lib/site";
 import {
   dictionaries,
   sendDictionary,
   alternatesFor,
+  localePath,
   type SiteLocale,
 } from "@/lib/dictionary";
 
@@ -44,6 +46,39 @@ export default async function SendPage({
   const dict = dictionaries[locale];
 
   const initialPlan: PlanId = query.plan === "DAILY" ? "DAILY" : "ONE_OFF";
+
+  // The form is the only route to a payment, so once the service is closing it
+  // is replaced outright rather than disabled — a form you can fill in and not
+  // submit wastes the visitor's time and their recipient's address.
+  if (SERVICE_CLOSED) {
+    return (
+      <>
+        <SiteHeader locale={locale} />
+
+        <main className="flex-1 bg-warm-wash">
+          <div className="mx-auto w-full max-w-2xl px-5 py-20 sm:px-8 lg:py-28">
+            <h1 className="font-display text-3xl leading-tight text-balance sm:text-4xl">
+              {dict.closed.heading}
+            </h1>
+            <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+              {dict.closed.body}
+            </p>
+            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+              {dict.closed.recipientsNote}
+            </p>
+            <Link
+              href={localePath(locale, "/")}
+              className="mt-10 inline-block text-sm font-semibold text-primary underline underline-offset-4"
+            >
+              {dict.closed.back}
+            </Link>
+          </div>
+        </main>
+
+        <SiteFooter locale={locale} />
+      </>
+    );
+  }
 
   return (
     <>

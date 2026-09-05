@@ -62,6 +62,16 @@ export const WITHDRAWAL_CONSENT_TEXT =
   "I want my message sent straight away, and I understand that once it has been sent I lose my right to cancel within 14 days.";
 
 /**
+ * The service is winding down.
+ *
+ * While this is true the checkout API refuses new orders and the send flow
+ * explains why instead of collecting an email address. A site that is closing
+ * but still able to take a payment is the one genuinely harmful state during a
+ * shutdown, so this is a single switch rather than something to remember.
+ */
+export const SERVICE_CLOSED = true;
+
+/**
  * Language everything is written and sent in today.
  *
  * A second locale means writing a fresh bank of messages in it, not translating

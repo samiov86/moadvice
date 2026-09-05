@@ -8,6 +8,7 @@ import { stripe, ensureStripeCustomer } from "@/lib/stripe";
 import {
   DEFAULT_LOCALE,
   PLANS,
+  SERVICE_CLOSED,
   WITHDRAWAL_CONSENT_TEXT,
   absoluteUrl,
 } from "@/lib/site";
@@ -61,6 +62,19 @@ const checkoutSchema = z.object({
  * All this does is create the PENDING order the webhook will look for.
  */
 export async function POST(request: Request) {
+  // Before anything else: no new orders once the service is closing. 410 Gone
+  // rather than 503, because this is permanent.
+  if (SERVICE_CLOSED) {
+    return NextResponse.json(
+      {
+        error:
+          "Mo Advice has stopped taking new orders. Nothing has been charged.",
+        code: "service_closed",
+      },
+      { status: 410 },
+    );
+  }
+
   // Cheap check first: refuse a flood before touching the database or Stripe.
   const ip = clientIpFrom(request.headers);
   const ipCheck = ipRateLimit(ip);
